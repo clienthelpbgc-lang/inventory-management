@@ -84,7 +84,6 @@ export async function sendStockAlertWhatsApp(
   const mediaId = await uploadWhatsAppMedia(content.pdf, filename);
 
   await sendWhatsAppDocumentTemplate(phone, mediaId, filename, [
-    content.companyName,
     String(content.outOfStockCount),
     String(content.lowStockCount),
   ]);
