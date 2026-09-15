@@ -177,6 +177,7 @@ export function SaleForm() {
                           selectedProductIds={selectedProductIds}
                           onChange={(product) => field.onChange(product.id)}
                           onClear={() => field.onChange("")}
+                          required
                         />
                       )}
                     />
@@ -187,6 +188,7 @@ export function SaleForm() {
                       name={`items.${index}.quantity`}
                       type="number"
                       label="Quantity"
+                      required
                     />
                   </div>
 

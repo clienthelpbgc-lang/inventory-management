@@ -12,9 +12,10 @@ export const SaleItemSchema = z.object({
 
   sellingPrice: z.coerce
     .number({
-      error: "Selling price is required",
+      error: "Selling price must be a number",
     })
-    .positive("Selling price must be greater than 0"),
+    .nonnegative("Selling price must be 0 or greater")
+    .default(0),
 });
 
 export const CreateSaleFormSchema = z

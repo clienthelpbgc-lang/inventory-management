@@ -18,6 +18,7 @@ type ProductPickerProps = {
   onClear?: () => void;
   label?: string;
   error?: string;
+  required?: boolean;
 };
 
 function ProductPickerImpl({
@@ -27,18 +28,14 @@ function ProductPickerImpl({
   onClear,
   label = "Product",
   error,
+  required = false,
 }: ProductPickerProps) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search.trim(), 300);
 
-  // The product a user selected is cached here directly instead of being
-  // re-derived from the live query result below: once selected, the search
-  // clears and the query switches to fetching an unfiltered product list
-  // (to resolve a pre-set `value` on mount). If the selected product isn't
-  // on that page, deriving the card from query data would make it vanish.
-  const [selectedProduct, setSelectedProduct] = useState<
-    Product | undefined
-  >(undefined);
+  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(
+    undefined,
+  );
 
   const needsResolve = Boolean(value) && selectedProduct?.id !== value;
 
@@ -98,6 +95,11 @@ function ProductPickerImpl({
                 <span className="text-sm text-muted-foreground">
                   Unit: {selectedProduct.unit}
                 </span>
+                {selectedProduct.unitCost && (
+                  <span className="text-sm text-muted-foreground">
+                    Unit Cost: ₹{selectedProduct?.unitCost}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -118,7 +120,10 @@ function ProductPickerImpl({
 
   return (
     <div className="space-y-3">
-      <Label>{label}</Label>
+      <Label className="flex items-center gap-1">
+        {label}
+        {required && <span className="text-destructive">*</span>}
+      </Label>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
@@ -182,6 +187,12 @@ function ProductPickerImpl({
                       <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
                         Unit: {product.unit}
                       </span>
+
+                      {product.unitCost && (
+                        <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+                          Unit Cost: ₹{product?.unitCost}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </button>

@@ -31,9 +31,21 @@ export const POST = routeHandler(async (req: NextRequest) => {
     string,
     { companyName: string; companyLogo: string | null; phones: string[] }
   >();
+  const seenPhoneKeysByCompany = new Map<string, Set<string>>();
 
   for (const target of targets) {
     if (!target.phone) continue;
+
+    // Same number can appear across multiple admin users, sometimes with a
+    // different country-code prefix — dedupe on the last 10 digits so we
+    // never send the same alert twice to the same person.
+    const phoneKey = target.phone.replace(/[^0-9]/g, "").slice(-10);
+    const seenKeys = seenPhoneKeysByCompany.get(target.companyId) ?? new Set();
+
+    if (seenKeys.has(phoneKey)) continue;
+
+    seenKeys.add(phoneKey);
+    seenPhoneKeysByCompany.set(target.companyId, seenKeys);
 
     const group = companyGroups.get(target.companyId);
 
