@@ -16,6 +16,7 @@ export function buildSalesQuery(
       id: sales.id,
       saleNumber: sales.saleNumber,
       saleDate: sales.saleDate,
+      soldTo: sales.soldTo,
       grandTotal: sales.grandTotal,
       createdAt: sales.createdAt,
       itemsCount: sql<number>`COUNT(${saleItems.id})`,

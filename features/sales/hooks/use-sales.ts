@@ -1,7 +1,7 @@
 "use client";
 
 import { saleKeys } from "@/features/sales/query/sale-keys";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { GetSalesParams } from "../types/sales.type";
 
@@ -16,6 +16,18 @@ export function useSales(params: GetSalesParams) {
       });
 
       return response.data.data;
+    },
+  });
+}
+
+export function useExportSales() {
+  return useMutation({
+    mutationFn: async (filters: GetSalesParams) => {
+      const { data } = await axios.get("/api/sales/export", {
+        params: filters,
+      });
+
+      return data.data;
     },
   });
 }

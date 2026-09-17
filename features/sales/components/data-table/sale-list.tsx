@@ -45,6 +45,12 @@ export function SaleList() {
   return (
     <div className="space-y-4">
       <SaleTableTools
+        exportFilters={{
+          search: debouncedSearch,
+          startDate,
+          endDate,
+          sortOrder,
+        }}
         search={search}
         onSearchChange={setSearch}
         startDate={startDate}

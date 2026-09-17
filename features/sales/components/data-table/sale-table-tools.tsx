@@ -11,6 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { SaleExportButton } from "../sale-pdf-button";
+import { GetSalesParams } from "../../types/sales.type";
+
 type SaleTableToolsProps = {
   search: string;
   onSearchChange: (value: string) => void;
@@ -23,6 +26,8 @@ type SaleTableToolsProps = {
 
   sortOrder?: "asc" | "desc";
   onSortOrderChange: (value?: "asc" | "desc") => void;
+
+  exportFilters: GetSalesParams;
 };
 
 export function SaleTableTools({
@@ -34,6 +39,7 @@ export function SaleTableTools({
   onEndDateChange,
   sortOrder,
   onSortOrderChange,
+  exportFilters,
 }: SaleTableToolsProps) {
   const hasFilters = !!startDate || !!endDate || !!sortOrder;
 
@@ -51,6 +57,8 @@ export function SaleTableTools({
       </div>
 
       <div className="flex items-center gap-3">
+        <SaleExportButton filters={exportFilters} />
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
