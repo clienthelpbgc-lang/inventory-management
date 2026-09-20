@@ -1,7 +1,7 @@
 import { ExternalServiceError } from "@/lib/errors";
 
 const API_VERSION = process.env.WHATSAPP_API_VERSION || "v21.0";
-const TEMPLATE_NAME = process.env.WHATSAPP_TEMPLATE_NAME || "stock_alert_pdf";
+const TEMPLATE_NAME = process.env.WHATSAPP_TEMPLATE_NAME || "daily_stock_alert";
 const TEMPLATE_LANGUAGE = process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en_US";
 
 function requireConfig(): { accessToken: string; phoneNumberId: string } {
