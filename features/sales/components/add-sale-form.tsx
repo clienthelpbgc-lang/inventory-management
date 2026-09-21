@@ -175,7 +175,17 @@ export function SaleForm() {
                         <ProductPicker
                           value={field.value}
                           selectedProductIds={selectedProductIds}
-                          onChange={(product) => field.onChange(product.id)}
+                          onChange={(product) => {
+                            field.onChange(product.id);
+
+                            if (product.unitCost) {
+                              form.setValue(
+                                `items.${index}.sellingPrice`,
+                                Number(product.unitCost),
+                                { shouldValidate: true },
+                              );
+                            }
+                          }}
                           onClear={() => field.onChange("")}
                           required
                         />
