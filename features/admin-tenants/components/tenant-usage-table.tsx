@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -12,32 +14,7 @@ import {
 
 import { TENANT_USAGE_STATUS_CONFIG } from "../constants/tenant-usage-status";
 import { TenantUsage } from "../types/tenant-usage.type";
-
-// Fixed zone so server and client render identical dates (no hydration
-// mismatch) and days line up with the business's calendar.
-const TIME_ZONE = "Asia/Kolkata";
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const displayDate = new Intl.DateTimeFormat("en-IN", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-  timeZone: TIME_ZONE,
-});
-
-// en-CA formats as YYYY-MM-DD, which Date.parse reads as UTC midnight.
-const calendarDay = new Intl.DateTimeFormat("en-CA", { timeZone: TIME_ZONE });
-
-function daysAgoLabel(timestamp: string, now: string) {
-  const days =
-    (Date.parse(calendarDay.format(new Date(now))) -
-      Date.parse(calendarDay.format(new Date(timestamp)))) /
-    DAY_MS;
-
-  if (days <= 0) return "Today";
-  if (days === 1) return "Yesterday";
-  return `${days} days ago`;
-}
+import { daysAgoLabel, displayDate } from "../utils/activity-dates";
 
 type TenantUsageTableProps = {
   tenants: TenantUsage[];
@@ -85,7 +62,12 @@ export function TenantUsageTable({
                 >
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
-                      {tenant.companyName}
+                      <Link
+                        href={`/admin/tenants/${tenant.companyId}`}
+                        className="hover:underline"
+                      >
+                        {tenant.companyName}
+                      </Link>
 
                       {!tenant.isActive && (
                         <Badge variant="outline">Suspended</Badge>

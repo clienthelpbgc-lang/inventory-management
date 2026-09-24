@@ -4,26 +4,15 @@ import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { companies } from "@/features/company/schemas/company.schema";
-import { processOrders } from "@/features/process-order/schemas/process-orders.schema";
-import { purchases } from "@/features/purchase/schemas/purchase.schema";
-import { saleReturns } from "@/features/returns/schemas/sale-return.schema";
-import { sales } from "@/features/sales/schemas/sales.schema";
 import { users } from "@/features/users/schemas/user.schema";
 import { mapDatabaseError } from "@/lib/errors/map-database-error";
 
-import {
-  ACTIVE_WITHIN_DAYS,
-  LOW_USAGE_WITHIN_DAYS,
-  TENANT_USAGE_STATUS,
-  TenantUsageStatus,
-} from "../constants/tenant-usage-status";
 import { TenantUsage } from "../types/tenant-usage.type";
+import { toIsoString } from "../utils/activity-dates";
+import { toUsageStatus } from "../utils/usage-status";
+import { activityEvents } from "./activity-events";
 
-// The postgres-js driver leaves timestamps as Postgres-formatted strings in raw
-// queries, e.g. "2026-09-23 06:51:30.078+00".
 type TenantUsageRow = Omit<TenantUsage, "status">;
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Usage summary for every tenant, least recently active first.
@@ -38,15 +27,7 @@ export async function getTenantUsage(): Promise<TenantUsage[]> {
 
   try {
     rows = await db.execute<TenantUsageRow>(sql`
-      WITH activity AS (
-        SELECT ${sales.companyId} AS company_id, ${sales.createdAt}::timestamptz AS at FROM ${sales}
-        UNION ALL
-        SELECT ${purchases.companyId}, ${purchases.createdAt}::timestamptz FROM ${purchases}
-        UNION ALL
-        SELECT ${saleReturns.companyId}, ${saleReturns.createdAt} FROM ${saleReturns}
-        UNION ALL
-        SELECT ${processOrders.companyId}, ${processOrders.createdAt} FROM ${processOrders}
-      ),
+      WITH activity AS (${activityEvents}),
       activity_agg AS (
         SELECT
           company_id,
@@ -100,22 +81,4 @@ export async function getTenantUsage(): Promise<TenantUsage[]> {
       status: toUsageStatus(lastActivityAt, now),
     };
   });
-}
-
-function toIsoString(timestamp: string | null) {
-  return timestamp ? new Date(timestamp).toISOString() : null;
-}
-
-function toUsageStatus(
-  lastActivityAt: string | null,
-  now: number,
-): TenantUsageStatus {
-  if (!lastActivityAt) return TENANT_USAGE_STATUS.NEVER_USED;
-
-  const idleDays = (now - Date.parse(lastActivityAt)) / DAY_MS;
-
-  if (idleDays <= ACTIVE_WITHIN_DAYS) return TENANT_USAGE_STATUS.ACTIVE;
-  if (idleDays <= LOW_USAGE_WITHIN_DAYS) return TENANT_USAGE_STATUS.LOW_USAGE;
-
-  return TENANT_USAGE_STATUS.INACTIVE;
 }
