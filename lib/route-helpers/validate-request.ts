@@ -7,5 +7,5 @@ export async function validateRequest<T>(
 ): Promise<T> {
   const body = await request.json();
 
-  return schema.parse(request);
+  return schema.parse(body);
 }

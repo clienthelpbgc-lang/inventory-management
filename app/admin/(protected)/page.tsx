@@ -4,7 +4,11 @@ import { ArrowRight, Users, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function AdminPage() {
+import { getActiveCompanyCount } from "@/features/company/service/get-companies.service";
+
+export default async function AdminPage() {
+  const activeClients = await getActiveCompanyCount();
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-50">
       {/* Background */}
@@ -79,7 +83,9 @@ export default function AdminPage() {
                 <div>
                   <p className="text-sm text-slate-500">Active Clients</p>
 
-                  <h3 className="text-3xl font-bold text-slate-900">128</h3>
+                  <h3 className="text-3xl font-bold text-slate-900">
+                    {activeClients}
+                  </h3>
                 </div>
               </div>
             </Card>

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 
 import { getReceiverPhones } from "@/features/company/service/get-company-user-phone.service";
-import { AuthorizationError } from "@/lib/errors";
+import { assertCronSecret } from "@/lib/route-helpers/assert-cron-secret";
 import { routeHandler } from "@/lib/route-helpers/route-handlers";
 import {
   buildStockAlertForCompanyWhatsApp,
@@ -19,11 +19,7 @@ type RecipientResult = {
 };
 
 export const POST = routeHandler(async (req: NextRequest) => {
-  const authHeader = req.headers.get("authorization");
-
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    throw new AuthorizationError("Invalid cron secret");
-  }
+  assertCronSecret(req);
 
   const targets = await getReceiverPhones();
 

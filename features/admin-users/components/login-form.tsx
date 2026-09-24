@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
@@ -49,7 +50,11 @@ export function AdminLoginForm() {
 
       await login(data);
 
-      window.location.href = "/admin/dashboard";
+      window.location.href = "/admin";
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Unable to sign in",
+      );
     } finally {
       setLoading(false);
     }

@@ -39,6 +39,10 @@ export const getCurrentUser = cache(async () => {
       throw new AuthorizationError("User is inactive");
     }
 
+    if (!user.company.isActive) {
+      throw new AuthorizationError("Company is inactive");
+    }
+
     return {
       id: user.id,
       name: user.name,

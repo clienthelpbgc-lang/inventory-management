@@ -31,28 +31,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       throw error;
     }
 
-    // verify authenticated user is in admin_users
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // Membership in admin_users is checked server-side; the browser client
+    // isn't allowed to read that table.
+    const response = await fetch("/api/admin-me", { cache: "no-store" });
 
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    const { data: admin, error: adminError } = await supabase
-      .from("admin_users")
-      .select("id")
-      .eq("id", user.id)
-      .single();
-
-    if (adminError || !admin) {
-      await supabase.auth.signOut();
-
-      throw new Error("You are not authorized as a platform admin");
-    }
-
-    if (!admin) {
+    if (!response.ok) {
       await supabase.auth.signOut();
 
       throw new Error("You are not authorized as a platform admin");
