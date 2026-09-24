@@ -15,24 +15,27 @@ export type TenantDetail = {
     phone: string | null;
   };
   status: TenantUsageStatus;
-  lastActivityAt: string | null;
-  activityByType: {
+  lastSeenAt: string | null;
+  lastUsedAt: string | null;
+  activeDaysLast30: number;
+  transactionsByType: {
     type: ActivityType;
     last30Days: number;
     lastAt: string | null;
   }[];
-  /** Oldest first; one entry per week, including weeks with no activity. */
-  weeklyActivity: {
+  /** Oldest first; one entry per week, including weeks with no transactions. */
+  weeklyTransactions: {
     /** Monday of the week, YYYY-MM-DD. */
     weekStart: string;
     count: number;
   }[];
-  /** Active users, most recently signed in first. */
+  /** Active users, most recently seen first. */
   users: {
     id: string;
     name: string;
     email: string;
     role: UserRole;
-    lastLoginAt: string | null;
+    lastSeenAt: string | null;
+    activeDaysLast30: number;
   }[];
 };

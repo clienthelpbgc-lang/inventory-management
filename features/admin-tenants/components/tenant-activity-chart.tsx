@@ -22,19 +22,19 @@ const HOVER_BAND_COLOR = "#f1f5f9";
 type ChartDatum = { label: string; count: number };
 
 type TenantActivityChartProps = {
-  weeklyActivity: TenantDetail["weeklyActivity"];
+  weeklyTransactions: TenantDetail["weeklyTransactions"];
 };
 
-export function TenantActivityChart({ weeklyActivity }: TenantActivityChartProps) {
-  if (weeklyActivity.every((week) => week.count === 0)) {
+export function TenantActivityChart({ weeklyTransactions }: TenantActivityChartProps) {
+  if (weeklyTransactions.every((week) => week.count === 0)) {
     return (
       <p className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-        No activity in the last {weeklyActivity.length} weeks.
+        No transactions in the last {weeklyTransactions.length} weeks.
       </p>
     );
   }
 
-  const data: ChartDatum[] = weeklyActivity.map((week) => ({
+  const data: ChartDatum[] = weeklyTransactions.map((week) => ({
     label: formatWeekStart(week.weekStart),
     count: week.count,
   }));

@@ -12,6 +12,8 @@ export const users = pgTable("users", {
   phone: text("phone"),
   role: text("role").$type<UserRole>().notNull().default(ROLES.STORE_ADMIN),
   isActive: boolean("is_active").notNull().default(true),
+  /** Last authenticated request, refreshed at most every 15 minutes. */
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
   createdAt: timestamp("created_at", {
     withTimezone: true,
   })

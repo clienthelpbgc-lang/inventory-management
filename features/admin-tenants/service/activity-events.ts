@@ -6,12 +6,13 @@ import { processOrders } from "@/features/process-order/schemas/process-orders.s
 import { purchases } from "@/features/purchase/schemas/purchase.schema";
 import { saleReturns } from "@/features/returns/schemas/sale-return.schema";
 import { sales } from "@/features/sales/schemas/sales.schema";
+import { users } from "@/features/users/schemas/user.schema";
 
 import { ACTIVITY_TYPE } from "../constants/activity-type";
 
 /**
- * Every tenant action that counts as "using the platform", as rows of
- * (company_id, type, at). Use as a subquery: `FROM (${activityEvents}) a`.
+ * Every transaction a tenant creates, as rows of (company_id, type, at).
+ * Use as a subquery: `FROM (${activityEvents}) a`.
  *
  * sales and purchases store created_at without a time zone; the cast reads
  * them as UTC, which is the database session's zone.
@@ -25,3 +26,10 @@ export const activityEvents = sql`
   UNION ALL
   SELECT ${processOrders.companyId}, ${ACTIVITY_TYPE.PROCESS_ORDER}::text, ${processOrders.createdAt} FROM ${processOrders}
 `;
+
+/**
+ * A user's last signed-in use. last_seen_at only exists from when tracking
+ * began, so the Supabase sign-in time fills in for older use.
+ * Expects `auth.users` joined as `auth_user`.
+ */
+export const userLastSeenAt = sql`GREATEST(${users.lastSeenAt}, auth_user.last_sign_in_at)`;

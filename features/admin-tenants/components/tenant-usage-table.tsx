@@ -14,7 +14,8 @@ import {
 
 import { TENANT_USAGE_STATUS_CONFIG } from "../constants/tenant-usage-status";
 import { TenantUsage } from "../types/tenant-usage.type";
-import { daysAgoLabel, displayDate } from "../utils/activity-dates";
+import { displayDate } from "../utils/activity-dates";
+import { TimestampCell } from "./timestamp-cell";
 
 type TenantUsageTableProps = {
   tenants: TenantUsage[];
@@ -33,9 +34,10 @@ export function TenantUsageTable({
           <TableRow>
             <TableHead>Company</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Last activity</TableHead>
-            <TableHead>Last login</TableHead>
-            <TableHead>Activity (30 days)</TableHead>
+            <TableHead>Last seen</TableHead>
+            <TableHead>Last transaction</TableHead>
+            <TableHead>Active days (30d)</TableHead>
+            <TableHead>Transactions (30d)</TableHead>
             <TableHead>Users</TableHead>
             <TableHead>Onboarded</TableHead>
           </TableRow>
@@ -45,7 +47,7 @@ export function TenantUsageTable({
           {tenants.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={7}
+                colSpan={8}
                 className="h-32 text-center text-muted-foreground"
               >
                 No companies match these filters.
@@ -63,7 +65,7 @@ export function TenantUsageTable({
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/admin/tenants/${tenant.companyId}`}
+                        href={`/admin/usage/${tenant.companyId}`}
                         className="hover:underline"
                       >
                         {tenant.companyName}
@@ -83,24 +85,26 @@ export function TenantUsageTable({
 
                   <TableCell>
                     <TimestampCell
-                      timestamp={tenant.lastActivityAt}
-                      now={generatedAt}
-                      emptyLabel="No activity"
-                    />
-                  </TableCell>
-
-                  <TableCell>
-                    <TimestampCell
-                      timestamp={tenant.lastLoginAt}
+                      timestamp={tenant.lastSeenAt}
                       now={generatedAt}
                       emptyLabel="Never"
                     />
                   </TableCell>
 
                   <TableCell>
-                    <p>{tenant.activityLast30Days}</p>
+                    <TimestampCell
+                      timestamp={tenant.lastTransactionAt}
+                      now={generatedAt}
+                      emptyLabel="None"
+                    />
+                  </TableCell>
+
+                  <TableCell>{tenant.activeDaysLast30}</TableCell>
+
+                  <TableCell>
+                    <p>{tenant.transactionsLast30Days}</p>
                     <p className="text-xs text-muted-foreground">
-                      {tenant.activityLast7Days} in last 7 days
+                      {tenant.transactionsLast7Days} in last 7 days
                     </p>
                   </TableCell>
 
@@ -121,28 +125,5 @@ export function TenantUsageTable({
         </TableBody>
       </Table>
     </div>
-  );
-}
-
-function TimestampCell({
-  timestamp,
-  now,
-  emptyLabel,
-}: {
-  timestamp: string | null;
-  now: string;
-  emptyLabel: string;
-}) {
-  if (!timestamp) {
-    return <span className="text-muted-foreground">{emptyLabel}</span>;
-  }
-
-  return (
-    <>
-      <p>{daysAgoLabel(timestamp, now)}</p>
-      <p className="text-xs text-muted-foreground">
-        {displayDate.format(new Date(timestamp))}
-      </p>
-    </>
   );
 }

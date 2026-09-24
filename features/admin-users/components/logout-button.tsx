@@ -36,7 +36,7 @@ export function AdminLogoutButton() {
       ) : (
         <LogOut className="h-4 w-4" />
       )}
-      Sign out
+      <span className="sr-only sm:not-sr-only">Sign out</span>
     </Button>
   );
 }

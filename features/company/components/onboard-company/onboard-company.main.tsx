@@ -35,7 +35,6 @@ import CompanyForm from "./company-step";
 import UsersForm from "./users-step";
 
 import { useOnboardCompany } from "../../hooks/use-onboard-company";
-import Link from "next/link";
 
 const STEPS = [
   { step: 1, title: "Company Details" },
@@ -111,18 +110,12 @@ export default function AddCompanyMain() {
 
   return (
     <FormProvider {...form}>
-      <div className="mx-auto max-w-7xl space-y-6 px-4 py-8">
-        {/* Hero Header */}
-        <div className="overflow-hidden rounded-3xl border bg-gradient-to-r from-white via-blue-100 to-indigo-300 p-8 text-white shadow-xl flex justify-between items-center">
-          <div className="flex items-center gap-5">
-            <img src="/logo.png" alt="Company Logo" className="h-20" />
-          </div>
-          <Link href={"/admin"} className="text-black">
-            <Button variant={"outline"}>
-              <ArrowLeftIcon className="h-4 w-4 text-black" />
-              Back
-            </Button>
-          </Link>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Onboard client</h1>
+          <p className="mt-1 text-muted-foreground">
+            Create a new company and its users.
+          </p>
         </div>
 
         {/* Progress */}

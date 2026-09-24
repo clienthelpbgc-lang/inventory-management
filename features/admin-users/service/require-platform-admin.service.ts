@@ -34,7 +34,7 @@ export const requirePlatformAdmin = cache(async () => {
 
   try {
     [admin] = await db
-      .select({ id: adminUsers.id })
+      .select({ id: adminUsers.id, name: adminUsers.name })
       .from(adminUsers)
       .where(eq(adminUsers.id, user.id))
       .limit(1);
@@ -46,5 +46,5 @@ export const requirePlatformAdmin = cache(async () => {
     throw new AuthorizationError("Platform admin access required");
   }
 
-  return { id: user.id, email: user.email ?? null };
+  return { id: user.id, name: admin.name, email: user.email ?? null };
 });

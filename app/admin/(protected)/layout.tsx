@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 
-import { AdminLogoutButton } from "@/features/admin-users/components/logout-button";
+import { AdminHeader } from "@/features/admin-users/components/admin-header";
 import { AdminAuthProvider } from "@/features/admin-users/context/admin-auth-context";
 import { requirePlatformAdmin } from "@/features/admin-users/service/require-platform-admin.service";
 import { AuthenticationError } from "@/lib/errors/authentication-error";
@@ -22,10 +22,11 @@ export default async function AdminProtectedLayout({
 
   return (
     <AdminAuthProvider>
-      <div className="fixed top-4 right-6 z-50">
-        <AdminLogoutButton />
+      <div className="min-h-screen bg-slate-50">
+        <AdminHeader />
+
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">{children}</main>
       </div>
-      {children}
     </AdminAuthProvider>
   );
 }

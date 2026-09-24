@@ -1,6 +1,7 @@
 export * from "@/features/admin-users/schemas/admin-user.schema";
 export * from "@/features/company/schemas/company.schema";
 export * from "@/features/users/schemas/user.schema";
+export * from "@/features/users/schemas/user-active-day.schema";
 export * from "@/features/suppliers/schemas/supplier.schema";
 export * from "@/features/product/schemas/product.schema";
 export * from "@/features/product/schemas/product-supplier.schema";

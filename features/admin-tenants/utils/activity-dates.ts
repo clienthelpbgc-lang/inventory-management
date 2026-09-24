@@ -1,6 +1,9 @@
-// Fixed zone so server and client render identical dates (no hydration
-// mismatch) and days and weeks line up with the business's calendar.
-export const TIME_ZONE = "Asia/Kolkata";
+import { APP_TIME_ZONE, toAppDate } from "@/lib/time-zone";
+
+// A fixed zone (not the viewer's) so server and client render identical
+// dates, with no hydration mismatch.
+const TIME_ZONE = APP_TIME_ZONE;
+
 export const DAY_MS = 24 * 60 * 60 * 1000;
 
 export const displayDate = new Intl.DateTimeFormat("en-IN", {
@@ -9,9 +12,6 @@ export const displayDate = new Intl.DateTimeFormat("en-IN", {
   year: "numeric",
   timeZone: TIME_ZONE,
 });
-
-// en-CA formats as YYYY-MM-DD, which Date.parse reads as UTC midnight.
-const calendarDay = new Intl.DateTimeFormat("en-CA", { timeZone: TIME_ZONE });
 
 // Week starts arrive as bare YYYY-MM-DD dates, so format them in UTC to keep
 // the day unshifted.
@@ -22,9 +22,10 @@ const weekStartDate = new Intl.DateTimeFormat("en-IN", {
 });
 
 export function daysAgoLabel(timestamp: string, now: string) {
+  // Date.parse reads YYYY-MM-DD as UTC midnight, so this is whole days.
   const days =
-    (Date.parse(calendarDay.format(new Date(now))) -
-      Date.parse(calendarDay.format(new Date(timestamp)))) /
+    (Date.parse(toAppDate(new Date(now))) -
+      Date.parse(toAppDate(new Date(timestamp)))) /
     DAY_MS;
 
   if (days <= 0) return "Today";
