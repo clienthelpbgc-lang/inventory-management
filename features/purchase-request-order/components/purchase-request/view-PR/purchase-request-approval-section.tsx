@@ -9,5 +9,9 @@ export default function PurchaseRequestApprovalSection({
   products: ViewPurchaseRequestType["products"];
   prData: PRPropDataType;
 }) {
+  // Nothing left to decide: hide the section instead of an empty table with
+  // an active Submit Decision button.
+  if (products.length === 0) return null;
+
   return <PRTableMain products={products} prData={prData} />;
 }

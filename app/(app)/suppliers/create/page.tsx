@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,10 +19,15 @@ export default function CreateSupplierPage() {
     mode: "onTouched",
   });
 
-  const { mutateAsync, isPending } = useCreateSupplier();
+  const router = useRouter();
+  const { mutate, isPending, isSuccess } = useCreateSupplier();
 
-  const onSubmit = async (data: CreateSupplierFormType) => {
-    await mutateAsync(data);
+  // The hook shows the success/error toast; send the user back to the list so
+  // a second click can't create a duplicate.
+  const onSubmit = (data: CreateSupplierFormType) => {
+    mutate(data, {
+      onSuccess: () => router.push("/suppliers"),
+    });
   };
 
   return (
@@ -62,7 +68,7 @@ export default function CreateSupplierPage() {
                   </p>
                 </div>
 
-                <Button type="submit" size="lg" disabled={isPending}>
+                <Button type="submit" size="lg" disabled={isPending || isSuccess}>
                   {isPending ? "Creating Supplier..." : "Create Supplier"}
                 </Button>
               </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AlertCircle, FileText, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -57,18 +58,15 @@ export default function PurchaseRequestPage() {
               their approval status, and track procurement progress.
             </p>
           </div>
-          <Button
-            disabled={isLoading || lowStockCount === 0}
-            onClick={() => {
-              window.open(
-                "/purchase-request/create",
-                "_blank",
-                "noopener,noreferrer",
-              );
-            }}
-          >
-            Create Purchase Request
-          </Button>
+          {isLoading || lowStockCount === 0 ? (
+            <Button disabled>Create Purchase Request</Button>
+          ) : (
+            <Button asChild>
+              <Link href="/purchase-request/create">
+                Create Purchase Request
+              </Link>
+            </Button>
+          )}
         </div>
 
         {isPending && (

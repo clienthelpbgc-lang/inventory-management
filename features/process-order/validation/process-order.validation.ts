@@ -10,10 +10,12 @@ export const ProcessOrderStatusSchema = z.enum(PROCESS_ORDER_STATUS_VALUES);
 export const ProcessOrderBaseSchema = z.object({
   processOrderNo: z.string().min(1, "Process Order Number is required"),
 
+  // Blank means an internal process with no outside vendor.
   vendorName: z
     .string()
     .trim()
-    .min(1, "Vendor name is required")
+    .max(255, "Vendor name cannot exceed 255 characters")
+    .transform((value) => value || null)
     .optional()
     .nullable(),
 

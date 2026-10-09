@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { FieldValues, Path, useFormContext } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
@@ -29,6 +33,9 @@ export function RHFInput<T extends FieldValues>({
     formState: { errors },
   } = useFormContext<T>();
 
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === "password";
+
   const error = name.split(".").reduce<any>((obj, key) => obj?.[key], errors);
 
  const registerOptions =
@@ -53,15 +60,35 @@ export function RHFInput<T extends FieldValues>({
         {required && <span className="text-destructive">*</span>}
       </Label>
 
-      <Input
-        id={name}
-        type={type}
-        step={step}
-        placeholder={placeholder}
-        disabled={disabled}
-        aria-required={required}
-        {...register(name, registerOptions)}
-      />
+      <div className="relative">
+        <Input
+          id={name}
+          type={isPassword && showPassword ? "text" : type}
+          step={step}
+          placeholder={placeholder}
+          disabled={disabled}
+          aria-required={required}
+          autoComplete={isPassword ? "new-password" : undefined}
+          className={isPassword ? "pr-10" : undefined}
+          {...register(name, registerOptions)}
+        />
+
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            tabIndex={-1}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </button>
+        )}
+      </div>
 
       {error?.message ? (
         <p className="text-sm text-destructive">{String(error.message)}</p>

@@ -2,7 +2,7 @@ import {
   PURCHASE_REQUEST_ITEM_STATUS,
   PurchaseRequestItemStatus,
 } from "../../../constants/purchase-request-item-status";
-import { PURCHASE_REQUEST_STATUS } from "../../../constants/purchase-request-status";
+import { ValidationError } from "@/lib/errors";
 import {
   NewPurchaseRequestItem,
   PurchaseRequestApprovalItems,
@@ -34,6 +34,17 @@ export function generateModifiedPRItems(
     const item = itemMap.get(approval.purchaseRequestItemId);
 
     if (!item) continue;
+
+    // Decided items already have a PO (or were rejected); deciding again
+    // would create a duplicate PO.
+    if (
+      item.status === PURCHASE_REQUEST_ITEM_STATUS.APPROVED ||
+      item.status === PURCHASE_REQUEST_ITEM_STATUS.REJECTED
+    ) {
+      throw new ValidationError(
+        "One or more items have already been decided. Refresh and try again.",
+      );
+    }
 
     switch (approval.decision) {
       case "APPROVE": {

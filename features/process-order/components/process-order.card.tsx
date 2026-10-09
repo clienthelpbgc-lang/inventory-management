@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Calendar, Eye, Trash2, Workflow } from "lucide-react";
 import { ProcessOrderList } from "../types/process-order.types";
 import {
@@ -136,16 +137,12 @@ export function ProcessOrderCard({ order }: ProcessOrderCardProps) {
             </p>
           </div>
           <div className="flex justify-end items-center gap-4">
-            <Eye
-              className="h-4 w-4"
-              onClick={() =>
-                window.open(
-                  `/process-orders/${order.id}`,
-                  "_blank",
-                  "noopener,noreferrer",
-                )
-              }
-            />
+            <Link
+              href={`/process-orders/${order.id}`}
+              aria-label={`View ${order.processOrderNo}`}
+            >
+              <Eye className="h-4 w-4" />
+            </Link>
             <DeleteProcessOrderDialog
               processOrderId={order.id}
               processOrderNumber={order.processOrderNo}

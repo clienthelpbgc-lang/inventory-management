@@ -3,30 +3,20 @@ import { createSale } from "@/features/sales/service/create-sale.service";
 import { getSales } from "@/features/sales/service/get-sales/get-sales.service";
 import { getCurrentUser } from "@/features/users/service/get-current-user.service";
 import { routeHandler } from "@/lib/route-helpers/route-handlers";
-import { NextResponse } from "next/server";
+import { readMultipartPayload } from "@/lib/route-helpers/read-multipart-payload";
+import { CreateSaleFormSchema } from "@/features/sales/validations/sales.validation";
 
 export const POST = routeHandler(async (request) => {
-  const formData = await request.formData();
-  const image = formData.get("image") as File | null;
-  const payloadRaw = formData.get("payload");
-
-  if (!payloadRaw || typeof payloadRaw !== "string") {
-    return NextResponse.json(
-      { message: "Payload is required" },
-      { status: 400 },
-    );
-  }
-
-  const payload = JSON.parse(payloadRaw);
   const { companyId, id } = await getCurrentUser();
-  return createSale(
-    {
-      ...payload,
-      image,
-    },
-    companyId,
-    id,
-  );
+  const { formData, payload } = await readMultipartPayload(request);
+  const image = formData.get("image");
+
+  const data = CreateSaleFormSchema.parse({
+    ...payload,
+    image: image instanceof File ? image : null,
+  });
+
+  return createSale(data, companyId, id);
 });
 
 export const GET = routeHandler(async (request) => {

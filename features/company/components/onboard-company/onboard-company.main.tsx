@@ -13,6 +13,8 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
+import { getApiErrorMessage } from "@/lib/api-error";
+
 import {
   Stepper,
   StepperContent,
@@ -50,6 +52,7 @@ export default function AddCompanyMain() {
   const router = useRouter();
 
   const { onboardCompany, isSubmitting } = useOnboardCompany();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const form = useForm<OnboardCompanyType>({
     resolver: zodResolver(onBoardCompanySchema),
@@ -94,17 +97,18 @@ export default function AddCompanyMain() {
         return;
       }
 
-      await onboardCompany(form.getValues());
+      const company = await onboardCompany(form.getValues());
 
-      toast.success("Company onboarded successfully.");
+      toast.success(`${company.name} onboarded successfully.`);
 
-      // router.push("/admin");
+      // Take the admin to the new tenant so it's clear onboarding finished,
+      // and keep the form locked meanwhile so it can't be submitted twice.
+      setIsRedirecting(true);
+      router.push(`/admin/usage/${company.id}`);
     } catch (error) {
       console.error(error);
 
-      toast.error(
-        error instanceof Error ? error.message : "Failed to onboard company.",
-      );
+      toast.error(getApiErrorMessage(error, "Failed to onboard company."));
     }
   };
 
@@ -199,7 +203,9 @@ export default function AddCompanyMain() {
             variant="outline"
             size="lg"
             onClick={handleBack}
-            disabled={currentStep === 1 || isSubmitting || isNavigating}
+            disabled={
+              currentStep === 1 || isSubmitting || isNavigating || isRedirecting
+            }
             className="gap-2"
           >
             <ArrowLeftIcon className="h-4 w-4" />
@@ -224,16 +230,20 @@ export default function AddCompanyMain() {
             <Button
               size="lg"
               onClick={handleSubmit}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isRedirecting}
               className="gap-2 bg-gradient-to-r from-emerald-600 to-green-600"
             >
-              {isSubmitting ? (
+              {isSubmitting || isRedirecting ? (
                 <LoaderCircleIcon className="h-4 w-4 animate-spin" />
               ) : (
                 <SendIcon className="h-4 w-4" />
               )}
 
-              {isSubmitting ? "Submitting..." : "Onboard Company"}
+              {isSubmitting
+                ? "Submitting..."
+                : isRedirecting
+                  ? "Opening company..."
+                  : "Onboard Company"}
             </Button>
           )}
         </div>

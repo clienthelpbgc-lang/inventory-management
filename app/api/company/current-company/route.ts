@@ -1,3 +1,4 @@
+import { readMultipartPayload } from "@/lib/route-helpers/read-multipart-payload";
 import { ZodError } from "zod";
 
 import { getCompanyById } from "@/features/company/service/get-company.service";
@@ -18,16 +19,9 @@ export const PATCH = routeHandler(async (request) => {
 
   assertPermission(role, "company:update");
 
-  const formData = await request.formData();
+  const { formData, payload } = await readMultipartPayload(request);
 
   const logo = formData.get("logo");
-  const payloadRaw = formData.get("payload");
-
-  if (!payloadRaw || typeof payloadRaw !== "string") {
-    throw new ValidationError("Payload is required.");
-  }
-
-  const payload = JSON.parse(payloadRaw);
 
   let data;
   try {

@@ -10,6 +10,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 const AddSalePage = () => {
   const createSaleForm = useForm({
@@ -26,8 +27,8 @@ const AddSalePage = () => {
         toast.success("Outgoing created successfully");
         createSaleForm.reset();
       },
-      onError: () => {
-        toast.error("Failed to create Outgoing");
+      onError: (error) => {
+        toast.error(getApiErrorMessage(error, "Failed to create Outgoing"));
       },
     });
   };

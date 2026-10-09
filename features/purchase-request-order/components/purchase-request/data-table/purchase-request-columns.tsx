@@ -77,6 +77,12 @@ export const columns: ColumnDef<PurchaseRequestProduct>[] = [
           {" • "}
           Max: {row.original.maxOrderQty ?? "-"}
         </p>
+
+        {!!row.original.onOrderQty && (
+          <p className="text-xs font-medium text-blue-600">
+            On order: {row.original.onOrderQty} {row.original.unit}
+          </p>
+        )}
       </div>
     ),
   },

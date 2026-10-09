@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Calendar, Eye, Layers, Package, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -134,19 +135,11 @@ export default function PurchaseRequestCard({
       </div>
 
       <div className="ml-auto flex shrink-0 items-center gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() =>
-            window.open(
-              `/purchase-request/${request.id}`,
-              "_blank",
-              "noopener,noreferrer",
-            )
-          }
-        >
-          <Eye className="mr-1.5 h-3.5 w-3.5" />
-          View
+        <Button size="sm" variant="outline" asChild>
+          <Link href={`/purchase-request/${request.id}`}>
+            <Eye className="mr-1.5 h-3.5 w-3.5" />
+            View
+          </Link>
         </Button>
         
       </div>

@@ -1,7 +1,7 @@
-import { and, count, eq, sql } from "drizzle-orm";
+import { and, count, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { processOrderItems, processOrders } from "@/db/schema";
-import { PROCESS_ORDER_ITEM_STATUS } from "@/features/process-order/constants/process-order-item-status";
+import { OPEN_PROCESS_ORDER_ITEM_STATUSES } from "@/features/process-order/constants/process-order-item-status";
 
 
 export interface IngoingProcessStats {
@@ -26,10 +26,7 @@ export const getIngoingProcessStats = async (
     .where(
       and(
         eq(processOrders.companyId, companyId),
-        eq(
-          processOrderItems.status,
-          PROCESS_ORDER_ITEM_STATUS.SENT,
-        ),
+        inArray(processOrderItems.status, OPEN_PROCESS_ORDER_ITEM_STATUSES),
       ),
     );
 

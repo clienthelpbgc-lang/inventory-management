@@ -107,10 +107,15 @@ export function CreateUserDialog() {
             />
 
             <div className="grid gap-4 md:grid-cols-2">
-              <RHFInput<OnboardUserType> name="password" label="Password" />
+              <RHFInput<OnboardUserType>
+                name="password"
+                type="password"
+                label="Password"
+              />
 
               <RHFInput<OnboardUserType>
                 name="confirmPassword"
+                type="password"
                 label="Confirm Password"
               />
             </div>

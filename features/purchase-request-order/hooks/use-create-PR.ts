@@ -1,11 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
+import { getApiErrorMessage } from "@/lib/api-error";
 
 import { PurchaseRequestFormType } from "../types/purchase-request.type";
 
 export function useCreatePurchaseRequest() {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (payload: PurchaseRequestFormType) => {
@@ -18,29 +22,25 @@ export function useCreatePurchaseRequest() {
       return data.data;
     },
 
-    onSuccess: async () => {
+    onSuccess: async ({ id }) => {
       toast.success("Purchase Request created successfully!");
+
+      router.push(`/purchase-request/${id}`);
 
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["purchase-requests"],
         }),
         queryClient.invalidateQueries({
-          queryKey: ["purchase-request-products"], // same key used by useGetPRProduct
+          queryKey: ["purchase-requests-products"], // same key used by useGetPRProduct
         }),
       ]);
     },
 
     onError: (error) => {
-      if (axios.isAxiosError(error)) {
-        toast.error(
-          error.response?.data?.message ??
-            "Failed to create purchase request.",
-        );
-        return;
-      }
-
-      toast.error("Failed to create purchase request.");
+      toast.error(
+        getApiErrorMessage(error, "Failed to create purchase request."),
+      );
     },
   });
 }

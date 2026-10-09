@@ -106,7 +106,20 @@ export function SaleForm() {
               <Checkbox
                 id="isWarranty"
                 checked={!!field.value}
-                onCheckedChange={(checked) => field.onChange(!!checked)}
+                onCheckedChange={(checked) => {
+                  field.onChange(!!checked);
+
+                  // Warranty replacements go out free of charge.
+                  if (checked) {
+                    form.getValues("items").forEach((_, index) =>
+                      form.setValue(`items.${index}.sellingPrice`, 0, {
+                        shouldValidate: true,
+                      }),
+                    );
+                  } else {
+                    form.trigger("items");
+                  }
+                }}
               />
               <Label htmlFor="isWarranty" className="font-normal">
                 Under warranty
@@ -178,7 +191,10 @@ export function SaleForm() {
                           onChange={(product) => {
                             field.onChange(product.id);
 
-                            if (product.unitCost) {
+                            if (
+                              product.unitCost &&
+                              !form.getValues("isWarranty")
+                            ) {
                               form.setValue(
                                 `items.${index}.sellingPrice`,
                                 Number(product.unitCost),
@@ -207,6 +223,9 @@ export function SaleForm() {
                       name={`items.${index}.sellingPrice`}
                       type="number"
                       label="Price"
+                      helperText={
+                        form.watch("isWarranty") ? "Warranty: ₹0" : undefined
+                      }
                     />
                   </div>
 

@@ -26,15 +26,13 @@ export const createProcessOrder = async (
   const { processOrder: processOrderPayload, items } = payload
   await db.transaction(async (tx) => {
     const processOrderNumber = await generateProcessOrderNumber(tx, companyId);
-    const newProcessOrder: ProcessOrderCreate = {
+    const newProcessOrder: ProcessOrderCreate = ProcessOrderCreateSchema.parse({
       companyId,
       processOrderNo: processOrderNumber,
       status: PROCESS_ORDER_STATUS.SENT,
       vendorName: processOrderPayload.vendorName ?? null,
-      remarks: processOrderPayload.remarks ?? null,
-    };
-
-    ProcessOrderCreateSchema.parse(newProcessOrder);
+      remarks: processOrderPayload.remarks?.trim() || null,
+    });
 
     const [createdProcessOrder] = await tx
       .insert(processOrders)

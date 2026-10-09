@@ -66,4 +66,19 @@ export const CreateSaleFormSchema = z
       path: ["items"],
       message: "Duplicate products are not allowed",
     },
-  );
+  )
+  .superRefine((data, ctx) => {
+    // A ₹0 line is only valid for a warranty replacement.
+    if (data.isWarranty) return;
+
+    data.items.forEach((item, index) => {
+      if (item.sellingPrice <= 0) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["items", index, "sellingPrice"],
+          message:
+            "Price must be greater than 0 unless the outgoing is under warranty",
+        });
+      }
+    });
+  });

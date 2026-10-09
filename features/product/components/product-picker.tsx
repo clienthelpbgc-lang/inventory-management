@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { Package, Search, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,12 @@ function ProductPickerImpl({
     },
     [onChange],
   );
+
+  // Touch taps are committed on pointerup, which fires before the browser
+  // dismisses the on-screen keyboard and reflows the page. The emulated mouse
+  // events that follow can land on a shifted/removed option, dropping the
+  // selection on phones. A drag (list scroll) is not treated as a tap.
+  const touchStart = useRef<{ id: string; x: number; y: number } | null>(null);
 
   const handleClear = useCallback(() => {
     setSelectedProduct(undefined);
@@ -161,15 +167,44 @@ function ProductPickerImpl({
                   type="button"
                   role="option"
                   aria-selected={false}
-                  onMouseDown={(e) => {
-                    // Commit the selection on press, not on click, so a
-                    // re-render between press and release (e.g. from a
-                    // background refetch) can't cause the release to land
-                    // on a moved/removed item and drop the selection.
-                    e.preventDefault();
-                    handleSelect(product);
+                  onPointerDown={(e) => {
+                    if (e.pointerType === "mouse") {
+                      // Commit on press, not on click, so a re-render between
+                      // press and release (e.g. from a background refetch)
+                      // can't make the release land on a moved/removed item.
+                      handleSelect(product);
+                      return;
+                    }
+
+                    touchStart.current = {
+                      id: product.id,
+                      x: e.clientX,
+                      y: e.clientY,
+                    };
                   }}
-                  className="flex w-full items-start gap-3 border-b p-4 text-left transition-colors last:border-b-0 hover:bg-muted/50"
+                  onPointerUp={(e) => {
+                    const start = touchStart.current;
+                    touchStart.current = null;
+
+                    if (
+                      e.pointerType !== "mouse" &&
+                      start?.id === product.id &&
+                      Math.hypot(e.clientX - start.x, e.clientY - start.y) < 10
+                    ) {
+                      e.preventDefault();
+                      handleSelect(product);
+                    }
+                  }}
+                  onPointerCancel={() => {
+                    touchStart.current = null;
+                  }}
+                  // Keep focus in the search box when pressing an option.
+                  onMouseDown={(e) => e.preventDefault()}
+                  // Keyboard activation (Enter/Space) reports detail 0.
+                  onClick={(e) => {
+                    if (e.detail === 0) handleSelect(product);
+                  }}
+                  className="flex w-full touch-manipulation items-start gap-3 border-b p-4 text-left transition-colors last:border-b-0 hover:bg-muted/50"
                 >
                   <div className="mt-0.5 flex size-8 items-center justify-center rounded-full bg-muted">
                     <Package className="size-4 text-muted-foreground" />

@@ -36,7 +36,7 @@ const PurchaseRequestCreationPage = () => {
         productId: product.productId,
         supplierId: product.supplierId ?? null,
         supplierName: product.supplierName ?? null,
-        requestedQty: product.reorderQty,
+        requestedQty: product.suggestedQty ?? product.reorderQty,
       })),
     });
   }, [form, lowStockProducts]);

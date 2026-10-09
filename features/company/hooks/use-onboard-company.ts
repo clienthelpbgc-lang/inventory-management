@@ -5,8 +5,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { OnboardCompanyType } from "../types/company.type";
 
+// The API returns the created company row.
 type OnboardCompanyResponse = {
-  companyId: string;
+  id: string;
+  name: string;
 };
 
 export function useOnboardCompany() {

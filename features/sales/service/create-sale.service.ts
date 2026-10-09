@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq, sql } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 
@@ -10,6 +10,8 @@ import {
   rollbackUploadedFiles,
   uploadImage,
 } from "@/lib/storage/upload-image.service";
+
+import { ValidationError } from "@/lib/errors";
 
 import { generateSaleNumber } from "./generate-sale-number.service";
 
@@ -81,16 +83,45 @@ export async function createSale(
 
       await tx.insert(saleItems).values(saleItemValues);
 
-      await Promise.all(
-        data.items.map((item) =>
-          tx
-            .update(products)
-            .set({
-              currentStock: sql`${products.currentStock} - ${item.quantity}`,
+      // Deduct only when enough stock is on hand; the guard in the WHERE
+      // clause keeps concurrent sales from pushing stock negative.
+      for (const item of data.items) {
+        const updated = await tx
+          .update(products)
+          .set({
+            currentStock: sql`${products.currentStock} - ${item.quantity}`,
+          })
+          .where(
+            and(
+              eq(products.id, item.productId),
+              eq(products.companyId, companyId),
+              gte(products.currentStock, item.quantity),
+            ),
+          )
+          .returning({ id: products.id });
+
+        if (updated.length === 0) {
+          const [product] = await tx
+            .select({
+              name: products.name,
+              unit: products.unit,
+              currentStock: products.currentStock,
             })
-            .where(eq(products.id, item.productId)),
-        ),
-      );
+            .from(products)
+            .where(
+              and(
+                eq(products.id, item.productId),
+                eq(products.companyId, companyId),
+              ),
+            );
+
+          throw new ValidationError(
+            product
+              ? `Insufficient stock for ${product.name}: ${product.currentStock} ${product.unit} available, ${item.quantity} requested.`
+              : "One or more products were not found.",
+          );
+        }
+      }
 
       return sale;
     });

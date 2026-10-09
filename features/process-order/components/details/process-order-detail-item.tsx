@@ -8,7 +8,13 @@ import {
 } from "../../types/process-order.types";
 import { formatDate } from "@/lib/format-date";
 import { RHFSelect } from "@/components/react-hook-form-fields/rhf-select";
-import { PROCESS_ORDER_ITEM_STATUS } from "../../constants/process-order-item-status";
+import {
+  OPEN_PROCESS_ORDER_ITEM_STATUSES,
+  PROCESS_ORDER_ITEM_ACTION,
+  PROCESS_ORDER_ITEM_STATUS,
+  PROCESS_ORDER_ITEM_STATUS_LABELS,
+  ProcessOrderItemStatus,
+} from "../../constants/process-order-item-status";
 import { RHFInput } from "@/components/react-hook-form-fields/rhf-input";
 import { RHFDatePicker } from "@/components/react-hook-form-fields/rhf-datepicker";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -16,6 +22,22 @@ import { Button } from "@/components/ui/button";
 import { RHFSwitch } from "@/components/react-hook-form-fields/rhf-switch";
 import { PROCESS_ORDER_STATUS } from "../../constants/process-order-status";
 import { Badge } from "@/components/ui/badge";
+
+const ITEM_ACTION_OPTIONS = [
+  { label: "Pending", value: PROCESS_ORDER_ITEM_ACTION.PENDING },
+  { label: "Receive", value: PROCESS_ORDER_ITEM_ACTION.RECEIVE },
+  { label: "Cancel remaining", value: PROCESS_ORDER_ITEM_ACTION.CANCEL },
+];
+
+const ITEM_STATUS_BADGE_CLASS: Record<ProcessOrderItemStatus, string> = {
+  [PROCESS_ORDER_ITEM_STATUS.SENT]:
+    "border-yellow-200 bg-yellow-50 text-yellow-700",
+  [PROCESS_ORDER_ITEM_STATUS.PARTIALLY_RECEIVED]:
+    "border-blue-200 bg-blue-50 text-blue-700",
+  [PROCESS_ORDER_ITEM_STATUS.RECEIVED]:
+    "border-green-200 bg-green-50 text-green-700",
+  [PROCESS_ORDER_ITEM_STATUS.CANCELLED]: "border-red-200 bg-red-50 text-red-700",
+};
 
 interface ProcessOrderItemsProps {
   items: ProcessOrderDetail["items"];
@@ -28,7 +50,9 @@ export function ProcessOrderItems({
   status,
   isProcessOrderUpdatePending,
 }: ProcessOrderItemsProps) {
-  const isEditable = status === PROCESS_ORDER_STATUS.SENT;
+  const isEditable =
+    status === PROCESS_ORDER_STATUS.SENT ||
+    status === PROCESS_ORDER_STATUS.PARTIALLY_RECEIVED;
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   const { control } = useFormContext<ProcessOrderUpdatePayload>();
@@ -61,10 +85,16 @@ export function ProcessOrderItems({
         {fields.map((field, index) => {
           const item = items[index];
           const values = watchedItems?.[index];
+          const isItemEditable =
+            isEditable && OPEN_PROCESS_ORDER_ITEM_STATUSES.includes(item.status);
+          const isReceiving =
+            isItemEditable && values?.action === PROCESS_ORDER_ITEM_ACTION.RECEIVE;
+          const isConversion = item.sentProduct.id !== item.receivedProduct.id;
+          const receivedSoFar = item.receivedQty ?? 0;
 
           return (
             <div key={field.id} className="transition-colors hover:bg-muted/50">
-              <div className="flex justify-between items-center gap-4">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4">
                 <div
                   role="button"
                   onClick={() => toggleExpand(item.id)}
@@ -121,47 +151,98 @@ export function ProcessOrderItems({
                       <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground">
                         <span>
                           <span className="font-medium text-foreground">
-                            {values?.receivedQty ?? "—"}
-                          </span>{" "}
-                          {item.receivedProduct.unit}
+                            {receivedSoFar}
+                          </span>
+                          {!isConversion && ` / ${item.sentQty}`}{" "}
+                          {item.receivedProduct.unit} received
                         </span>
 
                         <span>
-                          {values?.receivedDate
-                            ? formatDate(values.receivedDate)
+                          {item.receivedDate
+                            ? formatDate(item.receivedDate)
                             : "—"}
                         </span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="mr-4">
-                     {isEditable ? (
-                  <div>
-                    <RHFSwitch
-                      name={`items.${index}.status`}
-                      label="Received"
-                      checkedValue={PROCESS_ORDER_ITEM_STATUS.RECEIVED}
-                      uncheckedValue={PROCESS_ORDER_ITEM_STATUS.CANCELLED}
-                    />
-                  </div>
-                ) : (
+
+                <div className="flex shrink-0 flex-col items-start gap-2 px-6 pb-4 md:items-end md:px-0 md:pb-0 md:pr-4">
                   <Badge
                     variant="outline"
-                    className={
-                      item.status === PROCESS_ORDER_ITEM_STATUS.RECEIVED
-                        ? "border-green-200 bg-green-50 text-green-700"
-                        : "border-red-200 bg-red-50 text-red-700"
-                    }
+                    className={ITEM_STATUS_BADGE_CLASS[item.status]}
                   >
-                    {item.status === PROCESS_ORDER_ITEM_STATUS.RECEIVED
-                      ? "Received"
-                      : "Cancelled"}
+                    {PROCESS_ORDER_ITEM_STATUS_LABELS[item.status]}
                   </Badge>
-                )}
+
+                  {isItemEditable && (
+                    <div className="w-48">
+                      <RHFSelect<ProcessOrderUpdatePayload>
+                        name={`items.${index}.action`}
+                        label="Action"
+                        options={ITEM_ACTION_OPTIONS}
+                      />
                     </div>
-               
+                  )}
+                </div>
               </div>
+
+              {isReceiving && (
+                <div className="border-t border-border bg-muted/30 px-6 py-6">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <RHFInput<ProcessOrderUpdatePayload>
+                      name={`items.${index}.receiveQty`}
+                      label={`Quantity received now (${item.receivedProduct.unit})`}
+                      type="number"
+                      required
+                      helperText={
+                        isConversion
+                          ? `${receivedSoFar} received so far.`
+                          : `${item.sentQty - receivedSoFar} of ${item.sentQty} still pending.`
+                      }
+                    />
+
+                    <RHFDatePicker<ProcessOrderUpdatePayload>
+                      name={`items.${index}.receivedDate`}
+                      label="Received Date"
+                    />
+
+                    <RHFInput<ProcessOrderUpdatePayload>
+                      name={`items.${index}.processingCost`}
+                      label="Processing Cost"
+                      type="number"
+                    />
+
+                    <RHFInput<ProcessOrderUpdatePayload>
+                      name={`items.${index}.location`}
+                      label="Location"
+                    />
+                  </div>
+
+                  <div className="mt-2 -mx-4">
+                    <RHFSwitch<ProcessOrderUpdatePayload>
+                      name={`items.${index}.markComplete`}
+                      label="Mark item complete"
+                      helperText={
+                        isConversion
+                          ? "Turn on when this is the last delivery. Otherwise the item stays partially received."
+                          : "Turn on to close the item even if less than sent came back. The shortfall is treated as consumed. To return it to stock, choose “Cancel remaining” instead."
+                      }
+                    />
+                  </div>
+                </div>
+              )}
+
+              {isItemEditable &&
+                values?.action === PROCESS_ORDER_ITEM_ACTION.CANCEL && (
+                  <div className="border-t border-border bg-muted/30 px-6 py-4 text-sm text-muted-foreground">
+                    {isConversion
+                      ? receivedSoFar > 0
+                        ? "The item will be closed. Sent stock has already been converted, so nothing returns to inventory."
+                        : `${item.sentQty} ${item.sentProduct.unit} of ${item.sentProduct.name} will be returned to stock.`
+                      : `${item.sentQty - receivedSoFar} ${item.sentProduct.unit} of ${item.sentProduct.name} will be returned to stock.`}
+                  </div>
+                )}
 
               {expandedItems.has(item.id) && (
                 <div className="border-t border-border bg-muted/30 px-6 py-6">
@@ -219,71 +300,43 @@ export function ProcessOrderItems({
                           </div>
                         </div>
 
-                        {isEditable ? (
-                          <>
-                            <RHFInput<ProcessOrderUpdatePayload>
-                              name={`items.${index}.receivedQty`}
-                              label="Received Quantity"
-                              type="number"
-                            />
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground">
+                            Received Quantity
+                          </p>
+                          <div className="mt-1 text-sm">
+                            {receivedSoFar} {item.receivedProduct.unit}
+                          </div>
+                        </div>
 
-                            <RHFDatePicker<ProcessOrderUpdatePayload>
-                              name={`items.${index}.receivedDate`}
-                              label="Received Date"
-                            />
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground">
+                            Last Received Date
+                          </p>
+                          <div className="mt-1 text-sm">
+                            {item.receivedDate
+                              ? formatDate(item.receivedDate)
+                              : "—"}
+                          </div>
+                        </div>
 
-                            <RHFInput<ProcessOrderUpdatePayload>
-                              name={`items.${index}.processingCost`}
-                              label="Processing Cost"
-                              type="number"
-                            />
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground">
+                            Processing Cost
+                          </p>
+                          <div className="mt-1 text-sm">
+                            {item.processingCost ?? "—"}
+                          </div>
+                        </div>
 
-                            <RHFInput<ProcessOrderUpdatePayload>
-                              name={`items.${index}.location`}
-                              label="Location"
-                            />
-                          </>
-                        ) : (
-                          <>
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground">
-                                Received Quantity
-                              </p>
-                              <div className="mt-1 text-sm">
-                                {values?.receivedQty ?? "—"}
-                              </div>
-                            </div>
-
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground">
-                                Received Date
-                              </p>
-                              <div className="mt-1 text-sm">
-                                {values?.receivedDate
-                                  ? formatDate(values.receivedDate)
-                                  : "—"}
-                              </div>
-                            </div>
-
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground">
-                                Processing Cost
-                              </p>
-                              <div className="mt-1 text-sm">
-                                {values?.processingCost ?? "—"}
-                              </div>
-                            </div>
-
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground">
-                                Location
-                              </p>
-                              <div className="mt-1 text-sm">
-                                {values?.location || "—"}
-                              </div>
-                            </div>
-                          </>
-                        )}
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground">
+                            Location
+                          </p>
+                          <div className="mt-1 text-sm">
+                            {item.location || "—"}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

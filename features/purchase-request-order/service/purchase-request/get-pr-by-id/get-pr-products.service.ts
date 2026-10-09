@@ -1,7 +1,6 @@
 import { db } from "@/db";
 import { products, purchaseRequestItems, suppliers } from "@/db/schema";
-import { and, eq, inArray, notInArray } from "drizzle-orm";
-import { PURCHASE_REQUEST_ITEM_STATUS } from "../../../constants/purchase-request-item-status";
+import { eq } from "drizzle-orm";
 
 export async function getPurchaseRequestProducts(purchaseRequestId: string) {
   return db
@@ -26,13 +25,5 @@ export async function getPurchaseRequestProducts(purchaseRequestId: string) {
     .from(purchaseRequestItems)
     .innerJoin(products, eq(products.id, purchaseRequestItems.productId))
     .leftJoin(suppliers, eq(suppliers.id, purchaseRequestItems.supplierId))
-    .where(
-      and(
-        eq(purchaseRequestItems.purchaseRequestId, purchaseRequestId),
-        notInArray(purchaseRequestItems.status, [
-          PURCHASE_REQUEST_ITEM_STATUS.APPROVED,
-          PURCHASE_REQUEST_ITEM_STATUS.REJECTED,
-        ]),
-      ),
-    );
+    .where(eq(purchaseRequestItems.purchaseRequestId, purchaseRequestId));
 }

@@ -63,8 +63,12 @@ export function PurchaseRequestApprovalTable({
   return (
     <Card className="overflow-hidden gap-0 py-0">
       <CardContent className="p-0">
-        <div className="max-h-[50vh] overflow-auto">
-          <Table>
+        {/* One scroll container for both axes so the horizontal scrollbar
+            stays reachable and the sticky header keeps working. */}
+        <Table
+          containerClassName="max-h-[50vh] overflow-auto overscroll-x-contain"
+          className="min-w-[1100px]"
+        >
             <TableHeader className="sticky top-0 z-20 bg-background">
               {table.getHeaderGroups().map((group) => (
                 <TableRow key={group.id}>
@@ -135,10 +139,9 @@ export function PurchaseRequestApprovalTable({
                 ))
               )}
             </TableBody>
-          </Table>
-        </div>
+        </Table>
 
-        <div className="flex items-center justify-between border-t bg-muted/20 px-6 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t bg-muted/20 px-6 py-4">
           <div className="flex flex-wrap items-center gap-6 text-sm">
             <div>
               <span className="font-medium text-green-700">

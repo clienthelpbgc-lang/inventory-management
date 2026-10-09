@@ -1,15 +1,17 @@
 import "server-only";
 
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { products } from "@/features/product/schemas/product.schema";
 import { purchaseItems } from "../schemas/purchase-item.schema";
 import { purchases } from "../schemas/purchase.schema";
+import { suppliers } from "@/features/suppliers/schemas/supplier.schema";
 
 import {
   CreatePurchaseFormType,
   CreatePurchaseType,
 } from "../types/purchase.type";
+import { ValidationError } from "@/lib/errors";
 import { generatePurchaseNumber } from "./generate-purchase-number.service";
 import {
   rollbackUploadedFiles,
@@ -29,6 +31,20 @@ export async function createPurchase(
 
   try {
     return await db.transaction(async (tx) => {
+      const [supplier] = await tx
+        .select({ id: suppliers.id })
+        .from(suppliers)
+        .where(
+          and(
+            eq(suppliers.id, data.supplierId),
+            eq(suppliers.companyId, companyId),
+          ),
+        );
+
+      if (!supplier) {
+        throw new ValidationError("Supplier not found.");
+      }
+
       const purchaseNumber = await generatePurchaseNumber(tx, companyId);
 
       const grandTotal = data.items.reduce(
@@ -76,16 +92,24 @@ export async function createPurchase(
         })),
       );
 
-      await Promise.all(
-        data.items.map((item) =>
-          tx
-            .update(products)
-            .set({
-              currentStock: sql`${products.currentStock} + ${item.quantity}`,
-            })
-            .where(eq(products.id, item.productId)),
-        ),
-      );
+      for (const item of data.items) {
+        const updated = await tx
+          .update(products)
+          .set({
+            currentStock: sql`${products.currentStock} + ${item.quantity}`,
+          })
+          .where(
+            and(
+              eq(products.id, item.productId),
+              eq(products.companyId, companyId),
+            ),
+          )
+          .returning({ id: products.id });
+
+        if (updated.length === 0) {
+          throw new ValidationError("One or more products were not found.");
+        }
+      }
 
       return purchase;
     });

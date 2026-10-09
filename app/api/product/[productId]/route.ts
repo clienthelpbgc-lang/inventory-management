@@ -1,9 +1,10 @@
+import { readMultipartPayload } from "@/lib/route-helpers/read-multipart-payload";
 import { deleteProduct } from "@/features/product/service/delete-product.service";
 import { getProductById } from "@/features/product/service/get-product-by-id.service";
 import { updateProduct } from "@/features/product/service/update-product.service";
+import { UpdateProductFormType } from "@/features/product/types/product.types";
 import { getCurrentUser } from "@/features/users/service/get-current-user.service";
 import { assertPermission } from "@/features/auth/constants/permissions";
-import { ValidationError } from "@/lib/errors";
 import { routeHandler } from "@/lib/route-helpers/route-handlers";
 import { NextRequest } from "next/server";
 
@@ -35,17 +36,11 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 export async function PUT(request: NextRequest, context: RouteContext) {
   const { productId } = await context.params;
   return routeHandler(async () => {
-    const formData = await request.formData();
+    const { formData, payload } = await readMultipartPayload(request);
 
     const newImages = formData
       .getAll("images")
       .filter((value): value is File => value instanceof File);
-    const payloadRaw = formData.get("payload");
-
-    if (!payloadRaw || typeof payloadRaw !== "string") {
-      throw new ValidationError("Payload is required.");
-    }
-    const payload = JSON.parse(payloadRaw);
 
     const existingImages: string[] = Array.isArray(payload.images)
       ? payload.images.filter(
@@ -55,7 +50,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     const { companyId } = await getCurrentUser();
     return updateProduct(productId, companyId, {
-      ...payload,
+      ...(payload as Omit<UpdateProductFormType, "images">),
       images: [...existingImages, ...newImages],
     });
   })(request);

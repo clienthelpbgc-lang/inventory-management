@@ -7,7 +7,7 @@ import {
   ProcessOrderUpdatePayload,
 } from "../../types/process-order.types";
 import { ProcessOrderUpdatePayloadSchema } from "../../validation/process-order-item.validation";
-import { PROCESS_ORDER_ITEM_STATUS } from "../../constants/process-order-item-status";
+import { PROCESS_ORDER_ITEM_ACTION } from "../../constants/process-order-item-status";
 
 import { ProcessOrderHeader } from "./process-order-header";
 import { ProcessOrderItems } from "./process-order-detail-item";
@@ -33,19 +33,18 @@ const ProcessOrderDetailMain = ({
     form.reset({
       items: processOrder.items.map((item) => ({
         id: item.id,
-        receivedQty: item.receivedQty ?? item.sentQty,
-        receivedDate: item.receivedDate ?? new Date(),
+        action: PROCESS_ORDER_ITEM_ACTION.PENDING,
+        receiveQty: undefined,
+        markComplete: false,
+        receivedDate: new Date(),
         processingCost: item.processingCost ?? undefined,
         location: item.location,
-        status: PROCESS_ORDER_ITEM_STATUS.RECEIVED,
       })),
     });
   }, [processOrder, form]);
 
   const onSubmit: SubmitHandler<ProcessOrderUpdatePayload> = async (data) => {
     try {
-      console.log("Submitted Data:", data);
-
       await mutateAsync(data);
     } catch (error) {
       console.error("Failed to update process order:", error);

@@ -4,31 +4,19 @@ import { getPurchases } from "@/features/purchase/service/get-purchases.service"
 import { CreatePurchaseFormSchema } from "@/features/purchase/validations/purchase.validation";
 import { getCurrentUser } from "@/features/users/service/get-current-user.service";
 import { routeHandler } from "@/lib/route-helpers/route-handlers";
-import { validateRequest } from "@/lib/route-helpers/validate-request";
-import { NextResponse } from "next/server";
+import { readMultipartPayload } from "@/lib/route-helpers/read-multipart-payload";
 
 export const POST = routeHandler(async (request) => {
-  const formData = await request.formData();
-  const image = formData.get("image") as File | null;
-  const payloadRaw = formData.get("payload");
-
-  if (!payloadRaw || typeof payloadRaw !== "string") {
-    return NextResponse.json(
-      { message: "Payload is required" },
-      { status: 400 },
-    );
-  }
-
-  const payload = JSON.parse(payloadRaw);
   const { companyId, id } = await getCurrentUser();
-  return createPurchase(
-    {
-      ...payload,
-      image,
-    },
-    companyId,
-    id,
-  );
+  const { formData, payload } = await readMultipartPayload(request);
+  const image = formData.get("image");
+
+  const data = CreatePurchaseFormSchema.parse({
+    ...payload,
+    image: image instanceof File ? image : null,
+  });
+
+  return createPurchase(data, companyId, id);
 });
 
 export const GET = routeHandler(async (request) => {

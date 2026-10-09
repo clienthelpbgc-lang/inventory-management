@@ -31,6 +31,7 @@ import {
 import { useSale } from "@/features/sales/hooks/use-sale";
 
 import { useCreateSaleReturn } from "../hooks/use-create-return";
+import { OutgoingPicker } from "./outgoing-picker";
 
 type ReturnableSaleItem = {
   id: string;
@@ -44,8 +45,9 @@ type ReturnableSaleItem = {
 };
 
 type CreateReturnDialogProps = {
-  saleId: string;
-  saleNumber: string;
+  // Omit to let the user pick the outgoing inside the dialog.
+  saleId?: string;
+  saleNumber?: string;
   children?: React.ReactNode;
 };
 
@@ -59,8 +61,20 @@ export function CreateReturnDialog({
   children,
 }: CreateReturnDialogProps) {
   const [open, setOpen] = useState(false);
+  const [pickedSale, setPickedSale] = useState<{
+    id: string;
+    saleNumber: string;
+  } | null>(null);
 
-  const { data: sale, isLoading, isError, error } = useSale(open ? saleId : undefined);
+  const selectedSale =
+    saleId && saleNumber ? { id: saleId, saleNumber } : pickedSale;
+
+  const {
+    data: sale,
+    isLoading,
+    isError,
+    error,
+  } = useSale(open ? selectedSale?.id : undefined);
 
   const { mutateAsync, isPending } = useCreateSaleReturn();
 
@@ -72,6 +86,7 @@ export function CreateReturnDialog({
     setOpen(nextOpen);
 
     if (!nextOpen) {
+      setPickedSale(null);
       setReturnDate(today());
       setReason("");
       setQuantities({});
@@ -119,6 +134,8 @@ export function CreateReturnDialog({
   }
 
   async function handleSubmit() {
+    if (!selectedSale) return;
+
     if (!returnDate) {
       toast.error("Return date is required");
       return;
@@ -131,7 +148,7 @@ export function CreateReturnDialog({
 
     try {
       await mutateAsync({
-        saleId,
+        saleId: selectedSale.id,
         returnDate,
         reason: reason.trim() || undefined,
         items: selectedItems.map(({ item, quantity }) => ({
@@ -175,11 +192,15 @@ export function CreateReturnDialog({
         <DialogHeader className="shrink-0 border-b bg-background p-5">
           <DialogTitle className="flex items-center gap-2 text-base font-semibold">
             <Undo2 className="h-4 w-4 text-muted-foreground" />
-            Create Return — {saleNumber}
+            {selectedSale
+              ? `Create Return — ${selectedSale.saleNumber}`
+              : "Create Return — Select Outgoing"}
           </DialogTitle>
         </DialogHeader>
 
-        {isLoading ? (
+        {!selectedSale ? (
+          <OutgoingPicker onSelect={setPickedSale} />
+        ) : isLoading ? (
           <div className="flex flex-1 items-center justify-center">
             <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
           </div>
@@ -320,6 +341,19 @@ export function CreateReturnDialog({
                 </div>
 
                 <div className="flex items-center gap-3">
+                  {pickedSale && (
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setPickedSale(null);
+                        setQuantities({});
+                      }}
+                      disabled={isPending}
+                    >
+                      Change Outgoing
+                    </Button>
+                  )}
+
                   <Button
                     variant="outline"
                     onClick={() => handleOpenChange(false)}

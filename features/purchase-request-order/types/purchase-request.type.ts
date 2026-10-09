@@ -18,6 +18,10 @@ export type PurchaseRequestProduct = {
   minOrderQty: number;
   maxOrderQty: number;
   reorderQty: number;
+  // Ordered on a PO but not yet received.
+  onOrderQty?: number;
+  // Reorder quantity less what's already on order.
+  suggestedQty?: number;
   supplierId?: string | null;
   supplierName?: string | null;
 };
