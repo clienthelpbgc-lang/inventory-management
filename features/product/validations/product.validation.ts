@@ -144,6 +144,12 @@ export const CreateProductDTOSchema = z.object({
     })
     .int("Opening stock must be a whole number")
     .min(0, "Opening stock cannot be negative"),
+  currentStock: z
+    .number({
+      message: "Current stock is required",
+    })
+    .int("Current stock must be a whole number")
+    .min(0, "Current stock cannot be negative"),
   unitCost: z.string().nullable(),
   location: z
     .string()
@@ -156,11 +162,4 @@ export const CreateProductDTOSchema = z.object({
 
 export const UpdateProductDTOSchema = CreateProductDTOSchema.omit({
   openingStock: true,
-}).extend({
-  currentStock: z
-    .number({
-      message: "Current stock is required",
-    })
-    .int("Current stock must be a whole number")
-    .min(0, "Current stock cannot be negative"),
 });
