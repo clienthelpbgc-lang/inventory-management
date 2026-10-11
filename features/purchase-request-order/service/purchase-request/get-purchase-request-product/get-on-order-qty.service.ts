@@ -29,7 +29,7 @@ export async function getOnOrderQtyByProduct(
       )
       SELECT
         po_lines.product_id AS "productId",
-        SUM(GREATEST(po_lines.ordered_qty - COALESCE(received.qty, 0), 0))::int
+        SUM(GREATEST(po_lines.ordered_qty - COALESCE(received.qty, 0), 0))::float8
           AS "onOrderQty"
       FROM po_lines
       LEFT JOIN LATERAL (

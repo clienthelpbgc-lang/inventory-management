@@ -1,6 +1,6 @@
+import { quantityColumn } from "@/lib/quantity";
 import {
   index,
-  integer,
   numeric,
   pgTable,
   uniqueIndex,
@@ -20,7 +20,7 @@ export const purchaseItems = pgTable(
     productId: uuid("product_id")
       .references(() => products.id)
       .notNull(),
-    quantity: integer("quantity").notNull(),
+    quantity: quantityColumn("quantity").notNull(),
     purchasePrice: numeric("purchase_price", {
       precision: 12,
       scale: 2,

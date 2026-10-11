@@ -1,4 +1,5 @@
 import "server-only";
+import { roundQty } from "@/lib/quantity";
 
 import { and, eq, inArray, sql } from "drizzle-orm";
 
@@ -100,8 +101,9 @@ export async function createSaleReturn(
 
         const alreadyPending = pendingQtyBySaleItemId.get(item.saleItemId) ?? 0;
 
-        const returnableQty =
-          saleItem.quantity - saleItem.returnedQty - alreadyPending;
+        const returnableQty = roundQty(
+          saleItem.quantity - saleItem.returnedQty - alreadyPending,
+        );
 
         if (item.quantity > returnableQty) {
           throw new BusinessRuleError(

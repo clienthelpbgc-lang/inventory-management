@@ -93,6 +93,7 @@ export function CreateSupplierForm() {
             name="estimatedDeliveryPeriod"
             label="Estimated Delivery Period (Days)"
             type="number"
+            step={1}
             helperText="Average number of days required to deliver an order."
           />
 

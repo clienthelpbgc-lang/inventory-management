@@ -64,7 +64,7 @@ export function RHFInput<T extends FieldValues>({
         <Input
           id={name}
           type={isPassword && showPassword ? "text" : type}
-          step={step}
+          step={step ?? (type === "number" ? "any" : undefined)}
           placeholder={placeholder}
           disabled={disabled}
           aria-required={required}

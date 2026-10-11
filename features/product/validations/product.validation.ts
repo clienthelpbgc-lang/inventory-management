@@ -31,28 +31,24 @@ export const CreateProductFormSchema = z.object({
     .number({
       message: "Minimum order quantity is required",
     })
-    .int("Minimum order quantity must be a whole number")
     .min(0, "Minimum order quantity cannot be negative"),
 
   maxOrderQty: z
     .number({
       message: "Maximum order quantity is required",
     })
-    .int("Maximum order quantity must be a whole number")
     .min(0, "Maximum order quantity cannot be negative"),
 
   reorderQty: z
     .number({
       message: "Reorder quantity is required",
     })
-    .int("Reorder quantity must be a whole number")
     .min(0, "Reorder quantity cannot be negative"),
 
   openingStock: z
     .number({
       message: "Opening stock is required",
     })
-    .int("Opening stock must be a whole number")
     .min(0, "Opening stock cannot be negative"),
 
   unitCost: z
@@ -89,7 +85,6 @@ export const UpdateProductFormSchema = CreateProductFormSchema.omit({
     .number({
       message: "Current stock is required",
     })
-    .int("Current stock must be a whole number")
     .min(0, "Current stock cannot be negative"),
   images: z
     .array(
@@ -126,29 +121,24 @@ export const CreateProductDTOSchema = z.object({
     .number({
       message: "Minimum order quantity is required",
     })
-    .int("Minimum order quantity must be a whole number")
     .min(0, "Minimum order quantity cannot be negative"),
   maxOrderQty: z
     .number({
       message: "Maximum order quantity is required",
     })
-    .int("Maximum order quantity must be a whole number")
     .min(0, "Maximum order quantity cannot be negative"),
   reorderQty: z
     .number()
-    .int("Reorder quantity must be a whole number")
     .min(0, "Reorder quantity cannot be negative"),
   openingStock: z
     .number({
       message: "Opening stock is required",
     })
-    .int("Opening stock must be a whole number")
     .min(0, "Opening stock cannot be negative"),
   currentStock: z
     .number({
       message: "Current stock is required",
     })
-    .int("Current stock must be a whole number")
     .min(0, "Current stock cannot be negative"),
   unitCost: z.string().nullable(),
   location: z

@@ -209,7 +209,7 @@ export function PurchaseForm() {
 
                   <div className="lg:col-span-2 space-y-2">
                     <Label>Total</Label>
-                    <Input value={total} disabled />
+                    <Input value={total.toFixed(2)} disabled />
                   </div>
 
                   <div className="flex items-end lg:col-span-1">

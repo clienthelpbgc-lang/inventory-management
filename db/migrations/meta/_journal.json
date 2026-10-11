@@ -246,6 +246,13 @@
       "when": 1790209722832,
       "tag": "0034_user_activity_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1791747143708,
+      "tag": "0035_decimal_quantities",
+      "breakpoints": true
     }
   ]
 }

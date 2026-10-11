@@ -1,3 +1,4 @@
+import { quantityColumn } from "@/lib/quantity";
 import {
   date,
   index,
@@ -45,7 +46,7 @@ export const saleReturns = pgTable(
 
     totalItems: integer("total_items").notNull(),
 
-    totalReturnedQty: integer("total_returned_qty").notNull(),
+    totalReturnedQty: quantityColumn("total_returned_qty").notNull(),
 
     createdByUserId: uuid("created_by_user_id")
       .references(() => users.id)

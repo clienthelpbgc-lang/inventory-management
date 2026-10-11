@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { roundQty } from "@/lib/quantity";
 import { ChevronDown, ChevronUp, Calendar } from "lucide-react";
 import {
   ProcessOrderDetail,
@@ -198,7 +199,7 @@ export function ProcessOrderItems({
                       helperText={
                         isConversion
                           ? `${receivedSoFar} received so far.`
-                          : `${item.sentQty - receivedSoFar} of ${item.sentQty} still pending.`
+                          : `${roundQty(item.sentQty - receivedSoFar)} of ${item.sentQty} still pending.`
                       }
                     />
 
@@ -240,7 +241,7 @@ export function ProcessOrderItems({
                       ? receivedSoFar > 0
                         ? "The item will be closed. Sent stock has already been converted, so nothing returns to inventory."
                         : `${item.sentQty} ${item.sentProduct.unit} of ${item.sentProduct.name} will be returned to stock.`
-                      : `${item.sentQty - receivedSoFar} ${item.sentProduct.unit} of ${item.sentProduct.name} will be returned to stock.`}
+                      : `${roundQty(item.sentQty - receivedSoFar)} ${item.sentProduct.unit} of ${item.sentProduct.name} will be returned to stock.`}
                   </div>
                 )}
 

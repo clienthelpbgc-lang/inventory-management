@@ -1,3 +1,4 @@
+import { quantityColumn } from "@/lib/quantity";
 import {
   index,
   integer,
@@ -29,7 +30,7 @@ export const purchaseOrders = pgTable(
       .default(PURCHASE_ORDER_STATUS.EMAIL_PENDING),
     remarks: text("remarks"),
     totalItems: integer("total_items").notNull(),
-    totalOrderedQty: integer("total_ordered_qty").notNull(),
+    totalOrderedQty: quantityColumn("total_ordered_qty").notNull(),
     createdByUserId: uuid("created_by_user_id").notNull(),
     createdAt: timestamp("created_at", {
       withTimezone: true,

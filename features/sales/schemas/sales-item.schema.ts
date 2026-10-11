@@ -1,4 +1,5 @@
-import { index, integer, numeric, pgTable, uuid } from "drizzle-orm/pg-core";
+import { quantityColumn } from "@/lib/quantity";
+import { index, numeric, pgTable, uuid } from "drizzle-orm/pg-core";
 
 import { products } from "@/features/product/schemas/product.schema";
 import { sales } from "./sales.schema";
@@ -16,7 +17,7 @@ export const saleItems = pgTable(
       .references(() => products.id)
       .notNull(),
 
-    quantity: integer("quantity").notNull(),
+    quantity: quantityColumn("quantity").notNull(),
 
     sellingPrice: numeric("selling_price", {
       precision: 12,
@@ -28,7 +29,7 @@ export const saleItems = pgTable(
       scale: 2,
     }).notNull(),
 
-    returnedQty: integer("returned_qty").default(0).notNull(),
+    returnedQty: quantityColumn("returned_qty").default(0).notNull(),
   },
   (table) => [
     index("sale_items_sale_idx").on(table.saleId),

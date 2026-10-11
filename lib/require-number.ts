@@ -7,6 +7,5 @@ export const requiredNumber = (label: string) =>
       .number({
         error: `${label} is required`,
       })
-      .int()
       .min(0, `${label} cannot be negative`),
   );

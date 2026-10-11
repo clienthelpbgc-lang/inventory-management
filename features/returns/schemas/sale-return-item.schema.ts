@@ -1,4 +1,5 @@
-import { index, integer, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+import { quantityColumn } from "@/lib/quantity";
+import { index, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { products } from "@/features/product/schemas/product.schema";
 import { saleItems } from "@/features/sales/schemas/sales-item.schema";
@@ -22,7 +23,7 @@ export const saleReturnItems = pgTable(
       .references(() => products.id)
       .notNull(),
 
-    quantity: integer("quantity").notNull(),
+    quantity: quantityColumn("quantity").notNull(),
 
     createdAt: timestamp("created_at", {
       withTimezone: true,

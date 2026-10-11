@@ -1,7 +1,7 @@
+import { quantityColumn } from "@/lib/quantity";
 import { sql } from "drizzle-orm";
 import {
   check,
-  integer,
   index,
   numeric,
   pgTable,
@@ -24,11 +24,11 @@ export const products = pgTable(
     description: text("description"),
     category: text("category").notNull(),
     unit: text("unit").notNull(),
-    minOrderQty: integer("min_order_qty").default(0).notNull(),
-    maxOrderQty: integer("max_order_qty").default(1).notNull(),
-    reorderQty: integer("reorder_qty").default(0).notNull(),
-    openingStock: integer("opening_stock").default(0).notNull(),
-    currentStock: integer("current_stock").default(0).notNull(),
+    minOrderQty: quantityColumn("min_order_qty").default(0).notNull(),
+    maxOrderQty: quantityColumn("max_order_qty").default(1).notNull(),
+    reorderQty: quantityColumn("reorder_qty").default(0).notNull(),
+    openingStock: quantityColumn("opening_stock").default(0).notNull(),
+    currentStock: quantityColumn("current_stock").default(0).notNull(),
     unitCost: numeric("unit_cost"),
     location: text("location"),
     images: text("images")

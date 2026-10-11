@@ -3,6 +3,7 @@ import "server-only";
 import { and, eq, sql } from "drizzle-orm";
 
 import { db } from "@/db";
+import { roundQty } from "@/lib/quantity";
 import { saleReturnItems } from "@/features/returns/schemas/sale-return-item.schema";
 import { saleReturns } from "@/features/returns/schemas/sale-return.schema";
 import { SALE_RETURN_STATUS } from "@/features/returns/constants/sale-return-status";
@@ -102,7 +103,7 @@ export async function getSaleById(saleId: string, companyId: string) {
         pendingReturnQty,
         returnableQty: Math.max(
           0,
-          item.quantity - item.returnedQty - pendingReturnQty,
+          roundQty(item.quantity - item.returnedQty - pendingReturnQty),
         ),
       };
     }),

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { roundQty } from "@/lib/quantity";
 import { AlertCircle, Loader2, PackageX, Undo2 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
@@ -80,7 +81,7 @@ export function CreateReturnDialog({
 
   const [returnDate, setReturnDate] = useState(today);
   const [reason, setReason] = useState("");
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [quantities, setQuantities] = useState<Record<string, string>>({});
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);
@@ -106,15 +107,14 @@ export function CreateReturnDialog({
       returnableItems
         .map((item) => ({
           item,
-          quantity: quantities[item.id] ?? 0,
+          quantity: Number(quantities[item.id]) || 0,
         }))
         .filter(({ quantity }) => quantity > 0),
     [returnableItems, quantities],
   );
 
-  const totalReturnQty = selectedItems.reduce(
-    (sum, { quantity }) => sum + quantity,
-    0,
+  const totalReturnQty = roundQty(
+    selectedItems.reduce((sum, { quantity }) => sum + quantity, 0),
   );
 
   function handleQuantityChange(
@@ -122,10 +122,9 @@ export function CreateReturnDialog({
     maxQty: number,
     rawValue: string,
   ) {
-    const value = Math.max(
-      0,
-      Math.min(maxQty, Number(rawValue.replace(/[^0-9]/g, "")) || 0),
-    );
+    // Keep the raw text so partial decimals like "1." stay editable.
+    const cleaned = rawValue.replace(/[^0-9.]/g, "");
+    const value = Number(cleaned) > maxQty ? String(maxQty) : cleaned;
 
     setQuantities((prev) => ({
       ...prev,
@@ -308,8 +307,10 @@ export function CreateReturnDialog({
                               <Input
                                 type="number"
                                 min={0}
+                                step="any"
                                 max={item.returnableQty}
-                                value={quantities[item.id] ?? 0}
+                                placeholder="0"
+                                value={quantities[item.id] ?? ""}
                                 onChange={(e) =>
                                   handleQuantityChange(
                                     item.id,

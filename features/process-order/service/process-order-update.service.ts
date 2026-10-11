@@ -1,4 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
+import { roundQty } from "@/lib/quantity";
 
 import { db } from "@/db";
 
@@ -112,7 +113,7 @@ export const updateProcessOrder = async (
 
       if (item.action === PROCESS_ORDER_ITEM_ACTION.RECEIVE) {
         const receiveQty = item.receiveQty!;
-        receivedQty = alreadyReceived + receiveQty;
+        receivedQty = roundQty(alreadyReceived + receiveQty);
 
         if (!isConversion && receivedQty > existingItem.sentQty) {
           throw new ValidationError(
@@ -137,7 +138,7 @@ export const updateProcessOrder = async (
           ? alreadyReceived === 0
             ? existingItem.sentQty
             : 0
-          : existingItem.sentQty - alreadyReceived;
+          : roundQty(existingItem.sentQty - alreadyReceived);
 
         if (returnQty > 0) {
           await addStock(existingItem.sentProductId, returnQty);

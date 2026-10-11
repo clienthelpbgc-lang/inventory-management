@@ -1,4 +1,5 @@
 import { mapDatabaseError } from "@/lib/errors/map-database-error";
+import { roundQty } from "@/lib/quantity";
 import { getActivePurchaseRequestProductIds } from "./get-active-purchase-req-prod-id.service";
 import { getEligiblePurchaseRequestProducts } from "./get-eligible-purchase-req-product.service";
 import { getOnOrderQtyByProduct } from "./get-on-order-qty.service";
@@ -33,7 +34,7 @@ export async function getPurchaseRequestItems(
     // still below minimum once it arrives need a new request.
     return uniqueProducts.flatMap((product) => {
       const onOrderQty = onOrderQtyByProduct.get(product.productId) ?? 0;
-      const projectedStock = product.currentStock + onOrderQty;
+      const projectedStock = roundQty(product.currentStock + onOrderQty);
 
       if (projectedStock >= product.minOrderQty) return [];
 
@@ -41,9 +42,11 @@ export async function getPurchaseRequestItems(
         {
           ...product,
           onOrderQty,
-          suggestedQty: Math.max(
-            product.reorderQty - onOrderQty,
-            product.minOrderQty - projectedStock,
+          suggestedQty: roundQty(
+            Math.max(
+              product.reorderQty - onOrderQty,
+              product.minOrderQty - projectedStock,
+            ),
           ),
         },
       ];

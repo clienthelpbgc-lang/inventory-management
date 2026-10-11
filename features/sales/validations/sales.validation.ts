@@ -7,8 +7,7 @@ export const SaleItemSchema = z.object({
     .number({
       error: "Quantity is required",
     })
-    .int()
-    .min(1, "Quantity must be at least 1"),
+    .positive("Quantity must be greater than 0"),
 
   sellingPrice: z.coerce
     .number({

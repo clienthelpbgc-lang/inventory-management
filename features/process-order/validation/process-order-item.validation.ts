@@ -50,7 +50,6 @@ const ProcessOrderItemUpdateBaseSchema = z.object({
   // Quantity received in this update (added to anything received earlier).
   receiveQty: z
     .number("Enter the quantity received")
-    .int("Quantity must be a whole number")
     .positive("Quantity must be greater than 0")
     .optional(),
   // Close the item after this receipt even if less than sent came back.

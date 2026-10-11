@@ -1,3 +1,4 @@
+import { quantityColumn } from "@/lib/quantity";
 import {
   index,
   integer,
@@ -31,7 +32,7 @@ export const purchaseRequests = pgTable(
       .default(PURCHASE_REQUEST_STATUS.PENDING_APPROVAL),
     remarks: text("remarks"),
     totalItems: integer("total_items").notNull(),
-    totalRequestedQty: integer("total_requested_qty").notNull(),
+    totalRequestedQty: quantityColumn("total_requested_qty").notNull(),
     createdByUserId: uuid("created_by_user_id").notNull(),
     processedByUserId: uuid("processed_by_user_id"),
     processedAt: timestamp("processed_at", {

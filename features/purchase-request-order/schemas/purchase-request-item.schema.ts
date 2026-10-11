@@ -1,6 +1,6 @@
+import { quantityColumn } from "@/lib/quantity";
 import {
   index,
-  integer,
   pgEnum,
   pgTable,
   timestamp,
@@ -22,8 +22,8 @@ export const purchaseRequestItems = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     purchaseRequestId: uuid("purchase_request_id").notNull(),
     productId: uuid("product_id").notNull(),
-    requestedQty: integer("requested_qty").notNull(),
-    approvedQty: integer("approved_qty"),
+    requestedQty: quantityColumn("requested_qty").notNull(),
+    approvedQty: quantityColumn("approved_qty"),
     status: purchaseRequestItemStatusEnum("status")
       .$type<PurchaseRequestItemStatus>()
       .notNull()

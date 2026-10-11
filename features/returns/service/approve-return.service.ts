@@ -1,4 +1,5 @@
 import "server-only";
+import { roundQty } from "@/lib/quantity";
 
 import { and, eq, sql } from "drizzle-orm";
 
@@ -62,7 +63,9 @@ export async function approveSaleReturn(
           throw new NotFoundError("Sale item no longer exists.");
         }
 
-        const returnableQty = saleItem.quantity - saleItem.returnedQty;
+        const returnableQty = roundQty(
+          saleItem.quantity - saleItem.returnedQty,
+        );
 
         if (item.quantity > returnableQty) {
           throw new BusinessRuleError(

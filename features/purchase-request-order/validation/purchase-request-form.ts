@@ -10,13 +10,13 @@ export const PurchaseRequestSchema = z.object({
     .default(PURCHASE_REQUEST_STATUS.PENDING_APPROVAL),
   remarks: z.string().trim().optional().nullable(),
   totalItems: z.coerce.number().int().min(1),
-  totalRequestedQty: z.coerce.number().int().min(1),
+  totalRequestedQty: z.coerce.number().positive(),
 });
 
 export const PurchaseRequestItemSchema = z.object({
   productId: z.uuid(),
-  requestedQty: z.coerce.number().int().positive(),
-  approvedQty: z.coerce.number().int().nullable(),
+  requestedQty: z.coerce.number().positive(),
+  approvedQty: z.coerce.number().nullable(),
   status: z
     .enum(Object.values(PURCHASE_REQUEST_ITEM_STATUS) as [string, ...string[]])
     .default(PURCHASE_REQUEST_ITEM_STATUS.PENDING_APPROVAL),

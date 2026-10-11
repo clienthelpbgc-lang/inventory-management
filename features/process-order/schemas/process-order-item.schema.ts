@@ -1,7 +1,8 @@
+import { quantityColumn } from "@/lib/quantity";
 import {
   pgTable,
   uuid,
-  integer,
+  numeric,
   varchar,
   timestamp,
   pgEnum,
@@ -35,9 +36,9 @@ export const processOrderItems = pgTable("process_order_items", {
       onDelete: "restrict",
     }),
 
-  sentQty: integer("sent_qty").notNull(),
+  sentQty: quantityColumn("sent_qty").notNull(),
 
-  receivedQty: integer("received_qty"),
+  receivedQty: quantityColumn("received_qty"),
 
   sentDate: timestamp("sent_date", {
     withTimezone: true,
@@ -47,7 +48,11 @@ export const processOrderItems = pgTable("process_order_items", {
     withTimezone: true,
   }),
 
-  processingCost: integer("processing_cost"),
+  processingCost: numeric("processing_cost", {
+    precision: 12,
+    scale: 2,
+    mode: "number",
+  }),
 
   location: varchar("location", {
     length: 255,
