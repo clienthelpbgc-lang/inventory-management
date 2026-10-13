@@ -9,6 +9,10 @@ import { PurchaseRequestProduct } from "../../../types/purchase-request.type";
  * Default supplier for a product: whoever it was last bought from (incoming
  * purchase or PO, whichever is newer), falling back to the first supplier
  * linked to the product. Inactive suppliers are skipped.
+ *
+ * Outer columns are written as literal `products.*` references: Drizzle
+ * renders `${products.id}` as a bare "id" in a single-table select, which
+ * Postgres reads as ambiguous against the subquery's own `id` columns.
  */
 const defaultSupplierId = sql<string | null>`(
   SELECT used.supplier_id
@@ -16,20 +20,20 @@ const defaultSupplierId = sql<string | null>`(
     SELECT p.supplier_id, p.purchase_date::timestamp AS used_at, p.created_at AS tiebreak
     FROM purchase_items pi
     JOIN purchases p ON p.id = pi.purchase_id
-    WHERE pi.product_id = ${products.id} AND p.company_id = ${products.companyId}
+    WHERE pi.product_id = products.id AND p.company_id = products.company_id
 
     UNION ALL
 
     SELECT po.supplier_id, po.created_at AS used_at, po.created_at AS tiebreak
     FROM purchase_order_items poi
     JOIN purchase_orders po ON po.id = poi.purchase_order_id
-    WHERE poi.product_id = ${products.id} AND po.company_id = ${products.companyId}
+    WHERE poi.product_id = products.id AND po.company_id = products.company_id
 
     UNION ALL
 
     SELECT ps.supplier_id, '-infinity'::timestamp AS used_at, ps.created_at AS tiebreak
     FROM product_suppliers ps
-    WHERE ps.product_id = ${products.id}
+    WHERE ps.product_id = products.id
   ) used
   JOIN ${suppliers} s ON s.id = used.supplier_id AND s.is_active
   ORDER BY
