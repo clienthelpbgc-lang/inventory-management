@@ -39,7 +39,8 @@ export function ReturnTableTools({
   onStartDateChange,
   onEndDateChange,
 }: ReturnTableToolsProps) {
-  const hasFilters = !!status || !!startDate || !!endDate;
+  const hasFilters =
+    !!search.trim() || !!status || !!startDate || !!endDate;
   const { mutate: exportPdf, isPending } = useExportSaleReturnsPdf();
 
   return (
@@ -161,6 +162,7 @@ export function ReturnTableTools({
           variant="outline"
           disabled={!hasFilters}
           onClick={() => {
+            onSearchChange("");
             onStatusChange(undefined);
             onStartDateChange(undefined);
             onEndDateChange(undefined);

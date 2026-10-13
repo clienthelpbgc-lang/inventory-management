@@ -49,7 +49,7 @@ export const columns: ColumnDef<PurchaseRequestProduct>[] = [
         </p>
 
         {row.original.description && (
-          <p className="text-muted-foreground text-xs leading-relaxed">
+          <p className="break-words whitespace-normal text-muted-foreground text-xs leading-relaxed">
             {row.original.description}
           </p>
         )}

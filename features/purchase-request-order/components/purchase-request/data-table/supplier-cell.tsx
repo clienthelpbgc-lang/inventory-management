@@ -41,8 +41,14 @@ export function SupplierCell<T extends FieldValues>({
         render={({ field }) => (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-56 justify-between">
-                {supplierName || "Select Supplier"}
+              <Button
+                variant="outline"
+                className="w-56 justify-between"
+                title={supplierName || undefined}
+              >
+                <span className="truncate">
+                  {supplierName || "Select Supplier"}
+                </span>
               </Button>
             </PopoverTrigger>
 

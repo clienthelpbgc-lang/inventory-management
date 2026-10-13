@@ -64,6 +64,7 @@ export function PurchaseTableTools({
   exportFilters,
 }: PurchaseTableToolsProps) {
   const hasFilters =
+    !!search.trim() ||
     selectedSupplierIds.length > 0 ||
     !!startDate ||
     !!endDate ||
@@ -190,6 +191,7 @@ export function PurchaseTableTools({
           variant="outline"
           disabled={!hasFilters}
           onClick={() => {
+            onSearchChange("");
             onSupplierChange([]);
             onStartDateChange(undefined);
             onEndDateChange(undefined);
@@ -232,6 +234,7 @@ function SupplierFilterSection({
             className="flex items-center gap-2"
           >
             <Checkbox
+              id={`supplier-filter-${supplier.id}`}
               checked={selected.includes(
                 supplier.id,
               )}
@@ -251,7 +254,10 @@ function SupplierFilterSection({
               }}
             />
 
-            <label className="text-sm">
+            <label
+              htmlFor={`supplier-filter-${supplier.id}`}
+              className="cursor-pointer text-sm"
+            >
               {supplier.companyName}
             </label>
           </div>

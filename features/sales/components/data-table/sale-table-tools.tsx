@@ -41,7 +41,8 @@ export function SaleTableTools({
   onSortOrderChange,
   exportFilters,
 }: SaleTableToolsProps) {
-  const hasFilters = !!startDate || !!endDate || !!sortOrder;
+  const hasFilters =
+    !!search.trim() || !!startDate || !!endDate || !!sortOrder;
 
   return (
     <div className="flex items-center justify-between gap-4 rounded-xl bg-white p-4 shadow-sm">
@@ -134,6 +135,7 @@ export function SaleTableTools({
           variant="outline"
           disabled={!hasFilters}
           onClick={() => {
+            onSearchChange("");
             onStartDateChange(undefined);
             onEndDateChange(undefined);
             onSortOrderChange(undefined);

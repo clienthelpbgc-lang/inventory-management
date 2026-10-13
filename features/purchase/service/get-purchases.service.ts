@@ -34,6 +34,7 @@ export async function getPurchases(
       total: count(),
     })
     .from(purchases)
+    .innerJoin(suppliers, eq(suppliers.id, purchases.supplierId))
     .where(whereClause);
 
   return {

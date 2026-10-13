@@ -1,5 +1,5 @@
 import { suppliers } from "@/db/schema";
-import { eq, gte, lte, inArray, ilike, and, asc, desc } from "drizzle-orm";
+import { eq, gte, lte, inArray, ilike, and, or, asc, desc } from "drizzle-orm";
 import { purchases } from "../schemas/purchase.schema";
 import { GetPurchasesParams } from "../types/purchase.type";
 
@@ -29,7 +29,15 @@ export function buildPurchaseFiltersAndSorting(
   }
 
   if (search?.trim()) {
-    filters.push(ilike(purchases.purchaseNumber, `%${search.trim()}%`));
+    const term = `%${search.trim()}%`;
+
+    // Callers must join suppliers for the supplier-name match.
+    filters.push(
+      or(
+        ilike(purchases.purchaseNumber, term),
+        ilike(suppliers.companyName, term),
+      )!,
+    );
   }
 
   const whereClause = and(...filters);
