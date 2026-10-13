@@ -37,6 +37,11 @@ export function useApprovePurchaseRequest() {
         queryKey: ["purchase-requests"],
       });
 
+      // Approving/rejecting items changes which products can be requested.
+      await queryClient.invalidateQueries({
+        queryKey: ["purchase-requests-products"],
+      });
+
       toast.success("Purchase Request approved successfully.");
     },
 

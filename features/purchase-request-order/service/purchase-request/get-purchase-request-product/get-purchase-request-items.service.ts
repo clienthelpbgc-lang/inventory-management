@@ -31,12 +31,15 @@ export async function getPurchaseRequestItems(
     );
 
     // Stock already on order covers part of the shortage, so only products
-    // still below minimum once it arrives need a new request.
+    // still below minimum (or still out of stock) once it arrives need a new
+    // request.
     return uniqueProducts.flatMap((product) => {
       const onOrderQty = onOrderQtyByProduct.get(product.productId) ?? 0;
       const projectedStock = roundQty(product.currentStock + onOrderQty);
 
-      if (projectedStock >= product.minOrderQty) return [];
+      if (projectedStock > 0 && projectedStock >= product.minOrderQty) {
+        return [];
+      }
 
       return [
         {

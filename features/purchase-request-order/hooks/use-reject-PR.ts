@@ -18,6 +18,11 @@ export function useRejectPurchaseRequest() {
       queryClient.invalidateQueries({
         queryKey: ["purchase-requests"],
       });
+
+      // Rejected items free their products up for a new request.
+      queryClient.invalidateQueries({
+        queryKey: ["purchase-requests-products"],
+      });
     },
 
     onError: (error) => {

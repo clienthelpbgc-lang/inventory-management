@@ -1,4 +1,4 @@
-import { and, eq, inArray, lt, notInArray, sql } from "drizzle-orm";
+import { and, eq, inArray, lt, lte, notInArray, or, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { products, suppliers } from "@/db/schema";
@@ -62,7 +62,11 @@ export async function getEligiblePurchaseRequestProducts(
       .where(
         and(
           eq(products.companyId, companyId),
-          lt(products.currentStock, products.minOrderQty),
+          // Out of stock always qualifies, even with no minimum configured.
+          or(
+            lte(products.currentStock, 0),
+            lt(products.currentStock, products.minOrderQty),
+          ),
           excludedProductIds.length
             ? notInArray(products.id, excludedProductIds)
             : undefined,
